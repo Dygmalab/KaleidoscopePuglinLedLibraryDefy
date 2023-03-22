@@ -106,10 +106,15 @@ void ColormapEffectDefy::syncData(Devices device) {
   packet.data[0]        = Runtime.device().ledDriver().getBrightness();
   Communications.sendPacket(packet);
   packet.header.command = Communications_protocol::SET_PALETTE_COLORS;
-  packet.header.size    = sizeof(cRGB) * 16;
+  packet.header.size    = sizeof(cRGB) * 8;
+  //The message is bigger than the max message of 64 so lest split the message in 2
   cRGB palette[16];
   getColorPalette(palette);
-  memcpy(packet.data, palette, packet.header.size);
+  packet.data[0] = 0;
+  memcpy(&packet.data[1], &palette[packet.data[0]], packet.header.size);
+  Communications.sendPacket(packet);
+  packet.data[0] = 8;
+  memcpy(&packet.data[1], &palette[packet.data[0]], packet.header.size);
   Communications.sendPacket(packet);
   uint8_t layerColors[Runtime.device().led_count];
   uint8_t baseKeymapIndex    = device == Communications_protocol::Devices::KEYSCANNER_DEFY_RIGHT ? Runtime.device().ledDriver().key_matrix_leds : 0;
