@@ -13,29 +13,6 @@ class LedModeSerializable_Rainbow : public LedModeSerializable {
     : LedModeSerializable(id) {
   }
 
-#ifdef NEURON_WIRED
-  void update() override {
-    if (!kaleidoscope::Runtime.has_leds)
-      return;
-
-    if (!kaleidoscope::Runtime.hasTimeExpired(rainbowLastUpdate,
-                                              base_settings.delay_ms)) {
-      return;
-    } else {
-      rainbowLastUpdate += base_settings.delay_ms;
-    }
-    rainbowHue   = base_settings.step;
-    cRGB rainbow = hsvToRgb(rainbowHue, rainbowSaturation, base_settings.brightness);
-    rainbow.w    = 0;
-    rainbowHue += 1;
-    if (rainbowHue >= 255) {
-      rainbowHue -= 255;
-    }
-    base_settings.step = rainbowHue;
-    kaleidoscope::Runtime.device().ledDriver().setCrgbNeuron(rainbow);
-  }
-#endif
-
 #ifdef KEYSCANNER
   void update() override {
     rainbowHue   = base_settings.step;
@@ -48,6 +25,35 @@ class LedModeSerializable_Rainbow : public LedModeSerializable {
     base_settings.step = rainbowHue;
     LEDManagement::set_all_leds(rainbow);
     LEDManagement::set_updated(true);
+  }
+#else
+  void update() override {
+    if (!kaleidoscope::Runtime.has_leds)
+      return;
+
+    if (!kaleidoscope::Runtime.hasTimeExpired(rainbowLastUpdate, base_settings.delay_ms)) {
+      return;
+    } else {
+      rainbowLastUpdate += base_settings.delay_ms;
+    }
+    //Only for the neuron
+    rainbowHue       = base_settings.step;
+    uint16_t led_hue = rainbowHue + 16 * (kaleidoscope::Runtime.device().LEDs().all().end().offset() / 4);
+    // We want led_hue to be capped at 255, but we do not want to clip it to
+    // that, because that does not result in a nice animation. Instead, when it
+    // is higher than 255, we simply substract 255, and repeat that until we're
+    // within cap. This lays out the rainbow in a kind of wave.
+    while (led_hue > 255) {
+      led_hue -= 255;
+    }
+    cRGB rainbow = hsvToRgb(led_hue, rainbowSaturation, base_settings.brightness);
+    rainbow.w    = 0;
+    rainbowHue += 1;
+    if (rainbowHue >= 255) {
+      rainbowHue -= 255;
+    }
+    base_settings.step = rainbowHue;
+    kaleidoscope::Runtime.device().ledDriver().setCrgbNeuron(rainbow);
   }
 #endif
 
