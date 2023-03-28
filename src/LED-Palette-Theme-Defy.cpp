@@ -96,7 +96,6 @@ void LEDPaletteThemeDefy::updateColorIndexAtPosition(uint16_t map_base, uint16_t
     indexes       = (color_index << 4) + other;
   }
   Runtime.storage().update(map_base + position / 2, indexes);
-  Runtime.storage().commit();
 }
 
 EventHandlerResult LEDPaletteThemeDefy::onFocusEvent(const char *command) {
