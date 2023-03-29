@@ -96,7 +96,6 @@ void LEDPaletteThemeDefy::updateColorIndexAtPosition(uint16_t map_base, uint16_t
     indexes       = (color_index << 4) + other;
   }
   Runtime.storage().update(map_base + position / 2, indexes);
-  Runtime.storage().commit();
 }
 
 EventHandlerResult LEDPaletteThemeDefy::onFocusEvent(const char *command) {
@@ -149,7 +148,7 @@ EventHandlerResult LEDPaletteThemeDefy::themeFocusEvent(const char *command,
   if (::Focus.handleHelp(command, expected_command))
     return EventHandlerResult::OK;
 
-  if (strcmp_P(command, expected_command) != 0)
+  if (strcmp(command, expected_command) != 0)
     return EventHandlerResult::OK;
 
   uint16_t max_index = (max_themes * leds_per_layer_in_memory_);
