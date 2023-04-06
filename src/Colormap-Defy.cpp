@@ -101,6 +101,8 @@ EventHandlerResult ColormapEffectDefy::onSetup() {
 void ColormapEffectDefy::syncData(Devices device) {
   Packet packet{};
   packet.header.device  = device;
+  packet.header.command = CONNECTED;
+  Communications.sendPacket(packet);
   packet.header.command = SET_BRIGHTNESS;
   packet.header.size    = 1;
   packet.data[0]        = Runtime.device().ledDriver().getBrightness();
