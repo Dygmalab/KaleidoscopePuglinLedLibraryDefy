@@ -18,6 +18,8 @@
 #include <LED-Palette-Theme-Defy.h>
 #include <Kaleidoscope-EEPROM-Settings.h>
 #include <Kaleidoscope-FocusSerial.h>
+#include "Communications.h"
+#include "kaleidoscope/device/dygma/defyWN/Hand.h"
 
 namespace kaleidoscope {
 namespace plugin {
@@ -133,52 +135,31 @@ EventHandlerResult LEDPaletteThemeDefy::onFocusEvent(const char *command) {
   }
   Runtime.storage().commit();
 
-  ::LEDControl.refreshAll();
+  Packet packet{};
+  packet.header.device = UNKNOWN;
+  updatePaletteCommunication(packet);
 
+  ::LEDControl.refreshAll();
   return EventHandlerResult::EVENT_CONSUMED;
 }
+void LEDPaletteThemeDefy::updatePaletteCommunication(Packet &packet) {
+  packet.header.command = Communications_protocol::SET_PALETTE_COLORS;
+  packet.header.size    = sizeof(cRGB) * 8;
+  cRGB palette[16];
+  getColorPalette(palette);
+  packet.data[0] = 0;
+  memcpy(&packet.data[1], &palette[packet.data[0]], packet.header.size);
+  Communications.sendPacket(packet);
+  packet.data[0] = 8;
+  memcpy(&packet.data[1], &palette[packet.data[0]], packet.header.size);
+  Communications.sendPacket(packet);
+}
 
-EventHandlerResult LEDPaletteThemeDefy::themeFocusEvent(const char *command,
-                                                        const char *expected_command,
-                                                        uint16_t theme_base,
-                                                        uint8_t max_themes) {
-  if (!Runtime.has_leds)
-    return EventHandlerResult::OK;
-
-  if (::Focus.handleHelp(command, expected_command))
-    return EventHandlerResult::OK;
-
-  if (strcmp(command, expected_command) != 0)
-    return EventHandlerResult::OK;
-
-  uint16_t max_index = (max_themes * leds_per_layer_in_memory_);
-
-  if (::Focus.isEOL()) {
-    for (uint16_t pos = 0; pos < max_index; pos++) {
-      uint8_t indexes = Runtime.storage().read(theme_base + pos);
-
-      ::Focus.send((uint8_t)(indexes >> 4), indexes & ~0xf0);
-    }
-    return EventHandlerResult::EVENT_CONSUMED;
+void LEDPaletteThemeDefy::getColorPalette(cRGB output_palette[16]) {
+  for (int i = 0; i < 16; ++i) {
+    const cRGB &color = ::LEDPaletteThemeDefy.lookupPaletteColor(i);
+    output_palette[i] = color;
   }
-
-  uint16_t pos = 0;
-
-  while (!::Focus.isEOL() && (pos < max_index)) {
-    uint8_t idx1, idx2;
-    ::Focus.read(idx1);
-    ::Focus.read(idx2);
-
-    uint8_t indexes = (idx1 << 4) + idx2;
-
-    Runtime.storage().update(theme_base + pos, indexes);
-    pos++;
-  }
-  //  Runtime.device().syncLayers();
-  Runtime.storage().commit();
-  ::LEDControl.refreshAll();
-
-  return EventHandlerResult::EVENT_CONSUMED;
 }
 
 void LEDPaletteThemeDefy::updatePaletteColor(uint8_t palette_index, cRGB color) {

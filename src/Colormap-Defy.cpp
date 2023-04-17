@@ -75,13 +75,49 @@ EventHandlerResult ColormapEffectDefy::onLayerChange() {
 }
 
 EventHandlerResult ColormapEffectDefy::onFocusEvent(const char *command) {
-  return ::LEDPaletteThemeDefy.themeFocusEvent(command, "colormap.map", map_base_, max_layers_);
-}
-void ColormapEffectDefy::getColorPalette(cRGB output_palette[16]) {
-  for (int i = 0; i < 16; ++i) {
-    const cRGB &color = ::LEDPaletteThemeDefy.lookupPaletteColor(i);
-    output_palette[i] = color;
+  const char *expected_command = "colormap.map";
+
+  if (!Runtime.has_leds)
+    return EventHandlerResult::OK;
+
+  if (::Focus.handleHelp(command, expected_command))
+    return EventHandlerResult::OK;
+
+  if (strcmp(command, expected_command) != 0)
+    return EventHandlerResult::OK;
+
+  uint16_t max_index = (max_layers_ * (Runtime.device().led_count / 2));
+
+  if (::Focus.isEOL()) {
+    for (uint16_t pos = 0; pos < max_index; pos++) {
+      uint8_t indexes = Runtime.storage().read(map_base_ + pos);
+
+      ::Focus.send((uint8_t)(indexes >> 4), indexes & ~0xf0);
+    }
+    return EventHandlerResult::EVENT_CONSUMED;
   }
+
+  uint16_t pos = 0;
+
+  while (!::Focus.isEOL() && (pos < max_index)) {
+    uint8_t idx1, idx2;
+    ::Focus.read(idx1);
+    ::Focus.read(idx2);
+
+    uint8_t indexes = (idx1 << 4) + idx2;
+
+    Runtime.storage().update(map_base_ + pos, indexes);
+    pos++;
+  }
+
+  Runtime.storage().commit();
+
+  Packet packet{};
+  packet.header.device = Communications_protocol::UNKNOWN;
+  updateColorMapCommunications(packet);
+
+  ::LEDControl.refreshAll();
+  return EventHandlerResult::EVENT_CONSUMED;
 }
 
 void ColormapEffectDefy::getLayer(uint8_t layer, uint8_t output_buf[Runtime.device().led_count]) {
@@ -98,6 +134,7 @@ EventHandlerResult ColormapEffectDefy::onSetup() {
   Communications.callbacks.bind(CONNECTED, ([this](Packet packet) { syncData(packet.header.device); }));
   return EventHandlerResult::OK;
 }
+
 void ColormapEffectDefy::syncData(Devices device) {
   Packet packet{};
   packet.header.device  = device;
@@ -107,20 +144,17 @@ void ColormapEffectDefy::syncData(Devices device) {
   packet.header.size    = 1;
   packet.data[0]        = Runtime.device().ledDriver().getBrightness();
   Communications.sendPacket(packet);
-  packet.header.command = Communications_protocol::SET_PALETTE_COLORS;
-  packet.header.size    = sizeof(cRGB) * 8;
   //The message is bigger than the max message of 64 so lest split the message in 2
-  cRGB palette[16];
-  getColorPalette(palette);
-  packet.data[0] = 0;
-  memcpy(&packet.data[1], &palette[packet.data[0]], packet.header.size);
-  Communications.sendPacket(packet);
-  packet.data[0] = 8;
-  memcpy(&packet.data[1], &palette[packet.data[0]], packet.header.size);
-  Communications.sendPacket(packet);
+  LEDPaletteThemeDefy::updatePaletteCommunication(packet);
+  updateColorMapCommunications(packet);
+
+  ::LEDControl.set_mode(::LEDControl.get_mode_index());
+}
+
+void ColormapEffectDefy::updateColorMapCommunications(Packet &packet) {
   uint8_t layerColors[Runtime.device().led_count];
-  uint8_t baseKeymapIndex    = device == Communications_protocol::Devices::KEYSCANNER_DEFY_RIGHT ? Runtime.device().ledDriver().key_matrix_leds : 0;
-  uint8_t baseUnderGlowIndex = device == Communications_protocol::Devices::KEYSCANNER_DEFY_RIGHT ? (Runtime.device().ledDriver().key_matrix_leds) * 2 + Runtime.device().ledDriver().underglow_leds : Runtime.device().ledDriver().key_matrix_leds * 2;
+  uint8_t baseKeymapIndex    = packet.header.device == KEYSCANNER_DEFY_RIGHT ? Runtime.device().ledDriver().key_matrix_leds : 0;
+  uint8_t baseUnderGlowIndex = packet.header.device == KEYSCANNER_DEFY_RIGHT ? (Runtime.device().ledDriver().key_matrix_leds) * 2 + Runtime.device().ledDriver().underglow_leds : Runtime.device().ledDriver().key_matrix_leds * 2;
   for (int i = 0; i < getMaxLayers(); ++i) {
     getLayer(i, layerColors);
     packet.header.command = SET_LAYER_KEYMAP_COLORS;
@@ -133,7 +167,6 @@ void ColormapEffectDefy::syncData(Devices device) {
     memcpy(&packet.data[1], &layerColors[baseUnderGlowIndex], packet.header.size - 1);
     Communications.sendPacket(packet);
   }
-  ::LEDControl.set_mode(::LEDControl.get_mode_index());
 }
 
 }  // namespace plugin
