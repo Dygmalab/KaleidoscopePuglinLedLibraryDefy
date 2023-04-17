@@ -19,7 +19,6 @@
 #include <Kaleidoscope-EEPROM-Settings.h>
 #include <Kaleidoscope-FocusSerial.h>
 #include "Communications.h"
-#include "kaleidoscope/device/dygma/defyWN/Hand.h"
 
 namespace kaleidoscope {
 namespace plugin {
