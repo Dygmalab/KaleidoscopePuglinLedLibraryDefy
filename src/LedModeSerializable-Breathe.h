@@ -36,10 +36,11 @@ class LedModeSerializable_Breathe : public LedModeSerializable {
   }
 #endif
 
- private:
-  uint16_t breatheHue        = 4;
   uint16_t breatheSaturation = 31;
-  uint8_t breatheLastUpdate  = 0;
+
+ private:
+  uint16_t breatheHue       = 4;
+  uint8_t breatheLastUpdate = 0;
 };
 
 static LedModeSerializable_Breathe ledModeSerializableBreathe{CRC32_STR("LedModeSerializable_Breathe")};
