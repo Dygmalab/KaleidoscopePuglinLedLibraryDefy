@@ -141,15 +141,20 @@ EventHandlerResult LEDPaletteThemeDefy::onFocusEvent(const char *command) {
   ::LEDControl.refreshAll();
   return EventHandlerResult::EVENT_CONSUMED;
 }
+
 void LEDPaletteThemeDefy::updatePaletteCommunication(Packet &packet) {
-  packet.header.command = Communications_protocol::SET_PALETTE_COLORS;
-  packet.header.size    = sizeof(cRGB) * 8;
+  packet.header.command = Communications_protocol::PALETTE_COLORS;
+  packet.header.size    = sizeof(cRGB) * 6;
   cRGB palette[16];
   getColorPalette(palette);
   packet.data[0] = 0;
   memcpy(&packet.data[1], &palette[packet.data[0]], packet.header.size);
   Communications.sendPacket(packet);
-  packet.data[0] = 8;
+  packet.data[0] = 6;
+  memcpy(&packet.data[1], &palette[packet.data[0]], packet.header.size);
+  Communications.sendPacket(packet);
+  packet.header.size = sizeof(cRGB) * 4;
+  packet.data[0]     = 12;
   memcpy(&packet.data[1], &palette[packet.data[0]], packet.header.size);
   Communications.sendPacket(packet);
 }

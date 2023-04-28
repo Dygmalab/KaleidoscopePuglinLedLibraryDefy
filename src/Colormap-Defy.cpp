@@ -1,19 +1,19 @@
 /* -*- mode: c++ -*-
- * Kaleidoscope-Colormap -- Per-layer colormap effect
- * Copyright (C) 2016, 2017, 2018  Keyboard.io, Inc
- *
- * This program is free software: you can redistribute it and/or modify it under it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, version 3.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- *
- * You should have received a copy of the GNU General Public License along with along with
- * this program. If not, see <http://www.gnu.org/licenses/>.
- */
+* Kaleidoscope-Colormap -- Per-layer colormap effect
+* Copyright (C) 2016, 2017, 2018  Keyboard.io, Inc
+*
+* This program is free software: you can redistribute it and/or modify it under it under
+* the terms of the GNU General Public License as published by the Free Software
+* Foundation, version 3.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+* FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+* details.
+*
+* You should have received a copy of the GNU General Public License along with along with
+* this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 
 
 #include "Colormap-Defy.h"
@@ -114,7 +114,8 @@ EventHandlerResult ColormapEffectDefy::onFocusEvent(const char *command) {
 
   Packet packet{};
   packet.header.device = Communications_protocol::UNKNOWN;
-  updateColorMapCommunications(packet);
+  updateKeyMapCommunications(packet);
+  updateUnderGlowCommunications(packet);
 
   ::LEDControl.refreshAll();
   return EventHandlerResult::EVENT_CONSUMED;
@@ -131,40 +132,88 @@ uint8_t ColormapEffectDefy::getMaxLayers() {
 }
 
 EventHandlerResult ColormapEffectDefy::onSetup() {
-  Communications.callbacks.bind(CONNECTED, ([this](Packet packet) { syncData(packet.header.device); }));
+  Communications.callbacks.bind(PALETTE_COLORS, ([](Packet packet) {
+                                  volatile int i =0;
+                                  printf("Thi %i ",i);
+                                  LEDPaletteThemeDefy::updatePaletteCommunication(packet); }));
+  Communications.callbacks.bind(MODE_LED, ([](Packet packet) { ::LEDControl.set_mode(::LEDControl.get_mode_index()); }));
+  Communications.callbacks.bind(LAYER_KEYMAP_COLORS, ([this](Packet packet) {
+                                  updateKeyMapCommunications(packet);
+                                }));
+  Communications.callbacks.bind(LAYER_UNDERGLOW_COLORS, ([this](Packet packet) {
+                                  updateUnderGlowCommunications(packet);
+                                }));
+  Communications.callbacks.bind(BRIGHTNESS, ([](Packet packet) {
+                                  packet.header.command = BRIGHTNESS;
+                                  packet.header.size    = 1;
+                                  packet.data[0]        = Runtime.device().ledDriver().getBrightness();
+                                  Communications.sendPacket(packet);
+                                }));
   return EventHandlerResult::OK;
 }
 
-void ColormapEffectDefy::syncData(Devices device) {
-  Packet packet{};
-  packet.header.device  = device;
-  packet.header.command = CONNECTED;
-  Communications.sendPacket(packet);
-  packet.header.command = SET_BRIGHTNESS;
-  packet.header.size    = 1;
-  packet.data[0]        = Runtime.device().ledDriver().getBrightness();
-  Communications.sendPacket(packet);
-  //The message is bigger than the max message of 64 so lest split the message in 2
-  LEDPaletteThemeDefy::updatePaletteCommunication(packet);
-  updateColorMapCommunications(packet);
 
-  ::LEDControl.set_mode(::LEDControl.get_mode_index());
+void ColormapEffectDefy::updateKeyMapCommunications(Packet &packet) {
+  uint8_t layerColors[Runtime.device().led_count];
+  uint8_t baseKeymapIndex = packet.header.device == KEYSCANNER_DEFY_RIGHT ? Runtime.device().ledDriver().key_matrix_leds : 0;
+  union PaletteJoiner {
+    struct {
+      uint8_t firstColor : 4;
+      uint8_t secondColor : 4;
+    };
+    uint8_t paletteColor;
+  };
+  for (int i = 0; i < 1; ++i) {
+    getLayer(i, layerColors);
+    packet.header.command       = LAYER_KEYMAP_COLORS;
+    const uint8_t sizeofMessage = Runtime.device().ledDriver().key_matrix_leds / 2.0 + 0.5;
+    PaletteJoiner message[sizeofMessage];
+    packet.header.size = sizeof(message) + 1;
+    packet.data[0]     = i;
+    uint8_t k{};
+    bool swap = true;
+    for (int j = 0; j < Runtime.device().ledDriver().key_matrix_leds; ++j) {
+      if (swap) {
+        message[k].firstColor = layerColors[baseKeymapIndex + j];
+      } else {
+        message[k++].secondColor = layerColors[baseKeymapIndex + j];
+      }
+      swap = !swap;
+    }
+    memcpy(&packet.data[1], message, packet.header.size - 1);
+    Communications.sendPacket(packet);
+  }
 }
 
-void ColormapEffectDefy::updateColorMapCommunications(Packet &packet) {
+
+void ColormapEffectDefy::updateUnderGlowCommunications(Packet &packet) {
   uint8_t layerColors[Runtime.device().led_count];
-  uint8_t baseKeymapIndex    = packet.header.device == KEYSCANNER_DEFY_RIGHT ? Runtime.device().ledDriver().key_matrix_leds : 0;
   uint8_t baseUnderGlowIndex = packet.header.device == KEYSCANNER_DEFY_RIGHT ? (Runtime.device().ledDriver().key_matrix_leds) * 2 + Runtime.device().ledDriver().underglow_leds : Runtime.device().ledDriver().key_matrix_leds * 2;
+  union PaletteJoiner {
+    struct {
+      uint8_t firstColor : 4;
+      uint8_t secondColor : 4;
+    };
+    uint8_t paletteColor;
+  };
   for (int i = 0; i < getMaxLayers(); ++i) {
     getLayer(i, layerColors);
-    packet.header.command = SET_LAYER_KEYMAP_COLORS;
-    packet.header.size    = Runtime.device().ledDriver().key_matrix_leds + 1;
-    packet.data[0]        = i;
-    memcpy(&packet.data[1], &layerColors[baseKeymapIndex], packet.header.size - 1);
-    Communications.sendPacket(packet);
-    packet.header.command = SET_LAYER_UNDERGLOW_COLORS;
-    packet.header.size    = Runtime.device().ledDriver().underglow_leds + 1;
-    memcpy(&packet.data[1], &layerColors[baseUnderGlowIndex], packet.header.size - 1);
+    packet.header.command       = Communications_protocol::LAYER_UNDERGLOW_COLORS;
+    const uint8_t sizeofMessage = Runtime.device().ledDriver().underglow_leds / 2.0 + 0.5;
+    PaletteJoiner message[sizeofMessage];
+    packet.header.size = sizeof(message) + 1;
+    packet.data[0]     = i;
+    bool swap          = true;
+    uint8_t k{};
+    for (int j = 0; j < Runtime.device().ledDriver().underglow_leds; ++j) {
+      if (swap) {
+        message[k].firstColor = layerColors[baseUnderGlowIndex + j];
+      } else {
+        message[k++].secondColor = layerColors[baseUnderGlowIndex + j];
+      }
+      swap = !swap;
+    }
+    memcpy(&packet.data[1], message, packet.header.size - 1);
     Communications.sendPacket(packet);
   }
 }

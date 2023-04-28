@@ -9,7 +9,7 @@ class LedModeCommunication {
  protected:
   static void sendLedMode(LedModeSerializable &led_mode_serializable) {
     Communications_protocol::Packet packet{};
-    packet.header.command = Communications_protocol::SET_MODE_LED;
+    packet.header.command = Communications_protocol::MODE_LED;
     packet.header.size    = led_mode_serializable.serialize(packet.data);
     Communications.sendPacket(packet);
   }
