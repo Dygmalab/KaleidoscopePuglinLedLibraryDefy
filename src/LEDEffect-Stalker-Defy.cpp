@@ -29,7 +29,7 @@ void LEDStalkerDefy::TransientLEDMode::onActivate(void) {
 }
 
 void LEDStalkerDefy::TransientLEDMode::update(void) {
-  parent_->led_mode.update();
+  //  parent_->led_mode.update();
 }
 }  // namespace plugin
 }  // namespace kaleidoscope
