@@ -112,10 +112,6 @@ EventHandlerResult ColormapEffectDefy::onFocusEvent(const char *command) {
 
   Runtime.storage().commit();
 
-  Packet packet{};
-  packet.header.device = Communications_protocol::UNKNOWN;
-  updateKeyMapCommunications(packet);
-  updateUnderGlowCommunications(packet);
 
   ::LEDControl.refreshAll();
   return EventHandlerResult::EVENT_CONSUMED;
@@ -133,8 +129,6 @@ uint8_t ColormapEffectDefy::getMaxLayers() {
 
 EventHandlerResult ColormapEffectDefy::onSetup() {
   Communications.callbacks.bind(PALETTE_COLORS, ([](Packet packet) {
-                                  volatile int i =0;
-                                  printf("Thi %i ",i);
                                   LEDPaletteThemeDefy::updatePaletteCommunication(packet); }));
   Communications.callbacks.bind(MODE_LED, ([](Packet packet) { ::LEDControl.set_mode(::LEDControl.get_mode_index()); }));
   Communications.callbacks.bind(LAYER_KEYMAP_COLORS, ([this](Packet packet) {
@@ -163,26 +157,25 @@ void ColormapEffectDefy::updateKeyMapCommunications(Packet &packet) {
     };
     uint8_t paletteColor;
   };
-  for (int i = 0; i < 10; ++i) {
-    getLayer(i, layerColors);
-    packet.header.command       = LAYER_KEYMAP_COLORS;
-    const uint8_t sizeofMessage = Runtime.device().ledDriver().key_matrix_leds / 2.0 + 0.5;
-    PaletteJoiner message[sizeofMessage];
-    packet.header.size = sizeof(message) + 1;
-    packet.data[0]     = i;
-    uint8_t k{};
-    bool swap = true;
-    for (int j = 0; j < Runtime.device().ledDriver().key_matrix_leds; ++j) {
-      if (swap) {
-        message[k].firstColor = layerColors[baseKeymapIndex + j];
-      } else {
-        message[k++].secondColor = layerColors[baseKeymapIndex + j];
-      }
-      swap = !swap;
+  uint8_t layer = packet.data[0];
+  getLayer(layer, layerColors);
+  packet.header.command       = LAYER_KEYMAP_COLORS;
+  const uint8_t sizeofMessage = Runtime.device().ledDriver().key_matrix_leds / 2.0 + 0.5;
+  PaletteJoiner message[sizeofMessage];
+  packet.header.size = sizeof(message) + 1;
+  packet.data[0]     = layer;
+  uint8_t k{};
+  bool swap = true;
+  for (int j = 0; j < Runtime.device().ledDriver().key_matrix_leds; ++j) {
+    if (swap) {
+      message[k].firstColor = layerColors[baseKeymapIndex + j];
+    } else {
+      message[k++].secondColor = layerColors[baseKeymapIndex + j];
     }
-    memcpy(&packet.data[1], message, packet.header.size - 1);
-    Communications.sendPacket(packet);
+    swap = !swap;
   }
+  memcpy(&packet.data[1], message, packet.header.size - 1);
+  Communications.sendPacket(packet);
 }
 
 
@@ -196,26 +189,25 @@ void ColormapEffectDefy::updateUnderGlowCommunications(Packet &packet) {
     };
     uint8_t paletteColor;
   };
-  for (int i = 0; i < getMaxLayers(); ++i) {
-    getLayer(i, layerColors);
-    packet.header.command       = Communications_protocol::LAYER_UNDERGLOW_COLORS;
-    const uint8_t sizeofMessage = Runtime.device().ledDriver().underglow_leds / 2.0 + 0.5;
-    PaletteJoiner message[sizeofMessage];
-    packet.header.size = sizeof(message) + 1;
-    packet.data[0]     = i;
-    bool swap          = true;
-    uint8_t k{};
-    for (int j = 0; j < Runtime.device().ledDriver().underglow_leds; ++j) {
-      if (swap) {
-        message[k].firstColor = layerColors[baseUnderGlowIndex + j];
-      } else {
-        message[k++].secondColor = layerColors[baseUnderGlowIndex + j];
-      }
-      swap = !swap;
+  uint8_t layer = packet.data[0];
+  getLayer(layer, layerColors);
+  packet.header.command       = Communications_protocol::LAYER_UNDERGLOW_COLORS;
+  const uint8_t sizeofMessage = Runtime.device().ledDriver().underglow_leds / 2.0 + 0.5;
+  PaletteJoiner message[sizeofMessage];
+  packet.header.size = sizeof(message) + 1;
+  packet.data[0]     = layer;
+  bool swap          = true;
+  uint8_t k{};
+  for (int j = 0; j < Runtime.device().ledDriver().underglow_leds; ++j) {
+    if (swap) {
+      message[k].firstColor = layerColors[baseUnderGlowIndex + j];
+    } else {
+      message[k++].secondColor = layerColors[baseUnderGlowIndex + j];
     }
-    memcpy(&packet.data[1], message, packet.header.size - 1);
-    Communications.sendPacket(packet);
+    swap = !swap;
   }
+  memcpy(&packet.data[1], message, packet.header.size - 1);
+  Communications.sendPacket(packet);
 }
 
 }  // namespace plugin
