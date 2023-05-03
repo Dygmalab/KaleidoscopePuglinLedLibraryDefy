@@ -38,8 +38,9 @@ class LedModeSerializable_Breathe : public LedModeSerializable {
 
   uint16_t breatheSaturation = 31;
 
+  uint16_t breatheHue = 4;
+
  private:
-  uint16_t breatheHue       = 4;
   uint8_t breatheLastUpdate = 0;
 };
 
