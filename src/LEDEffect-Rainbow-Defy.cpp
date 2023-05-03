@@ -21,11 +21,6 @@ namespace plugin {
 
 void LEDRainbowEffectDefy::TransientLEDMode::update(void) {
   parent_->led_mode.update();
-  if (!kaleidoscope::Runtime.hasTimeExpired(rainbowLastUpdateKeyScanner, 1000)) {
-    return;
-  }
-  rainbowLastUpdateKeyScanner += 1000;
-  sendLedMode(parent_->led_mode);
 }
 
 void LEDRainbowEffectDefy::TransientLEDMode::onActivate() {
@@ -45,11 +40,6 @@ void LEDRainbowEffectDefy::update_delay(uint8_t delay) {
 
 void LEDRainbowWaveEffectDefy::TransientLEDMode::update(void) {
   parent_->led_mode.update();
-  if (!kaleidoscope::Runtime.hasTimeExpired(rainbowWaveLastUpdateKeyScanner, 1000)) {
-    return;
-  }
-  rainbowWaveLastUpdateKeyScanner += 1000;
-  sendLedMode(parent_->led_mode);
 }
 
 void LEDRainbowWaveEffectDefy::TransientLEDMode::onActivate() {

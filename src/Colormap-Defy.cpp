@@ -163,7 +163,7 @@ void ColormapEffectDefy::updateKeyMapCommunications(Packet &packet) {
     };
     uint8_t paletteColor;
   };
-  for (int i = 0; i < 1; ++i) {
+  for (int i = 0; i < 10; ++i) {
     getLayer(i, layerColors);
     packet.header.command       = LAYER_KEYMAP_COLORS;
     const uint8_t sizeofMessage = Runtime.device().ledDriver().key_matrix_leds / 2.0 + 0.5;
