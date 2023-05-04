@@ -128,8 +128,7 @@ uint8_t ColormapEffectDefy::getMaxLayers() {
 }
 
 EventHandlerResult ColormapEffectDefy::onSetup() {
-  Communications.callbacks.bind(PALETTE_COLORS, ([](Packet packet) {
-                                  LEDPaletteThemeDefy::updatePaletteCommunication(packet); }));
+  Communications.callbacks.bind(PALETTE_COLORS, ([](Packet packet) { LEDPaletteThemeDefy::updatePaletteCommunication(packet); }));
   Communications.callbacks.bind(MODE_LED, ([](Packet packet) { ::LEDControl.set_mode(::LEDControl.get_mode_index()); }));
   Communications.callbacks.bind(LAYER_KEYMAP_COLORS, ([this](Packet packet) {
                                   updateKeyMapCommunications(packet);
@@ -149,7 +148,12 @@ EventHandlerResult ColormapEffectDefy::onSetup() {
 
 void ColormapEffectDefy::updateKeyMapCommunications(Packet &packet) {
   uint8_t layerColors[Runtime.device().led_count];
-  uint8_t baseKeymapIndex = packet.header.device == KEYSCANNER_DEFY_RIGHT ? Runtime.device().ledDriver().key_matrix_leds : 0;
+  uint8_t baseKeymapIndex;
+  if (packet.header.device == KEYSCANNER_DEFY_RIGHT || packet.header.device == Communications_protocol::RF_DEFY_RIGHT) {
+    baseKeymapIndex = Runtime.device().ledDriver().key_matrix_leds;
+  } else {
+    baseKeymapIndex = 0;
+  }
   union PaletteJoiner {
     struct {
       uint8_t firstColor : 4;
@@ -181,7 +185,13 @@ void ColormapEffectDefy::updateKeyMapCommunications(Packet &packet) {
 
 void ColormapEffectDefy::updateUnderGlowCommunications(Packet &packet) {
   uint8_t layerColors[Runtime.device().led_count];
-  uint8_t baseUnderGlowIndex = packet.header.device == KEYSCANNER_DEFY_RIGHT ? (Runtime.device().ledDriver().key_matrix_leds) * 2 + Runtime.device().ledDriver().underglow_leds : Runtime.device().ledDriver().key_matrix_leds * 2;
+  uint8_t baseUnderGlowIndex;
+  if (packet.header.device == KEYSCANNER_DEFY_RIGHT || packet.header.device == Communications_protocol::RF_DEFY_RIGHT) {
+    baseUnderGlowIndex = (Runtime.device().ledDriver().key_matrix_leds) * 2 +
+                         Runtime.device().ledDriver().underglow_leds;
+  } else {
+    baseUnderGlowIndex = Runtime.device().ledDriver().key_matrix_leds * 2;
+  }
   union PaletteJoiner {
     struct {
       uint8_t firstColor : 4;
