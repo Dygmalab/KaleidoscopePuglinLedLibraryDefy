@@ -47,9 +47,9 @@ class LedModeSerializable_Stalker : public LedModeSerializable {
       compute_function_ = blazingTrail_compute;
       break;
     }
+    map = {};
 #endif
     base_settings.delay_ms = 50;
-    map                    = {};
     return index;
   }
 #ifdef KEYSCANNER
