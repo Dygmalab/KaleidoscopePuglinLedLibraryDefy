@@ -13,22 +13,22 @@ class LedModeSerializable_SolidColor : public LedModeSerializable {
     : LedModeSerializable(id) {
   }
   uint8_t serialize(uint8_t *output) const override {
-    uint8_t index     = LedModeSerializable::serialize(output);
-    output[index]     = r_;
-    output[index + 1] = g_;
-    output[index + 2] = b_;
-    output[index + 3] = w_;
-    return index;
+    uint8_t index   = LedModeSerializable::serialize(output);
+    output[index]   = r_;
+    output[++index] = g_;
+    output[++index] = b_;
+    output[++index] = w_;
+    return ++index;
   }
 
   uint8_t deSerialize(const uint8_t *input) override {
     uint8_t index          = LedModeSerializable::deSerialize(input);
     r_                     = input[index];
-    g_                     = input[index + 1];
-    b_                     = input[index + 2];
-    w_                     = input[index + 3];
+    g_                     = input[++index];
+    b_                     = input[++index];
+    w_                     = input[++index];
     base_settings.delay_ms = 100;
-    return index;
+    return ++index;
   }
 #ifdef NEURON_WIRED
   void update() override {

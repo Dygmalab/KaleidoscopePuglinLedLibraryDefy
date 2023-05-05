@@ -18,6 +18,7 @@
 #pragma once
 
 #include "kaleidoscope/Runtime.h"
+#include "Communications_protocol.h"
 #include <Kaleidoscope-LEDControl.h>
 
 namespace kaleidoscope {
@@ -34,16 +35,14 @@ class LEDPaletteThemeDefy : public kaleidoscope::Plugin {
   static const uint8_t lookupColorIndexAtPosition(uint16_t theme_base, uint16_t position);
   static const cRGB lookupColorAtPosition(uint16_t theme_base, uint16_t position);
   static void updateColorIndexAtPosition(uint16_t theme_base, uint16_t position, uint8_t color_index);
-
+  static void getColorPalette(cRGB output_palette[16]);
   static const cRGB lookupPaletteColor(uint8_t palette_index);
 
   EventHandlerResult onFocusEvent(const char *command);
-  EventHandlerResult themeFocusEvent(const char *command,
-                                     const char *expected_command,
-                                     uint16_t theme_base,
-                                     uint8_t max_themes);
 
-  void updatePaletteColor(uint8_t i, cRGB rgb);
+  static void updatePaletteColor(uint8_t i, cRGB rgb);
+  static void updatePaletteCommunication(Communications_protocol::Packet &packet);
+
 
  private:
   static uint16_t palette_base_;

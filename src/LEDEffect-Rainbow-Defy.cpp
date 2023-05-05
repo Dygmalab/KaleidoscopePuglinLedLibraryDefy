@@ -15,20 +15,22 @@
  */
 
 #include "LEDEffect-Rainbow-Defy.h"
+#include "Arduino.h"
 
 namespace kaleidoscope {
 namespace plugin {
 
 void LEDRainbowEffectDefy::TransientLEDMode::update(void) {
   parent_->led_mode.update();
-  if (!kaleidoscope::Runtime.hasTimeExpired(rainbowLastUpdateKeyScanner, 1000)) {
+  if (!kaleidoscope::Runtime.hasTimeExpired(rainbowLastUpdateKeyScanner, 2500)) {
     return;
   }
-  rainbowLastUpdateKeyScanner += 1000;
+  rainbowLastUpdateKeyScanner += 2500;
   sendLedMode(parent_->led_mode);
 }
 
 void LEDRainbowEffectDefy::TransientLEDMode::onActivate() {
+  rainbowLastUpdateKeyScanner += millis();
   sendLedMode(parent_->led_mode);
 }
 
@@ -45,14 +47,15 @@ void LEDRainbowEffectDefy::update_delay(uint8_t delay) {
 
 void LEDRainbowWaveEffectDefy::TransientLEDMode::update(void) {
   parent_->led_mode.update();
-  if (!kaleidoscope::Runtime.hasTimeExpired(rainbowWaveLastUpdateKeyScanner, 1000)) {
+  if (!kaleidoscope::Runtime.hasTimeExpired(rainbowWaveLastUpdateKeyScanner, 2500)) {
     return;
   }
-  rainbowWaveLastUpdateKeyScanner += 1000;
+  rainbowWaveLastUpdateKeyScanner += 2500;
   sendLedMode(parent_->led_mode);
 }
 
 void LEDRainbowWaveEffectDefy::TransientLEDMode::onActivate() {
+  rainbowWaveLastUpdateKeyScanner += millis();
   sendLedMode(parent_->led_mode);
 }
 

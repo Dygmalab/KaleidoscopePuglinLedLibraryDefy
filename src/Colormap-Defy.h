@@ -1,19 +1,19 @@
 /* -*- mode: c++ -*-
- * Kaleidoscope-Colormap -- Per-layer colormap effect
- * Copyright (C) 2016, 2017, 2018  Keyboard.io, Inc
- *
- * This program is free software: you can redistribute it and/or modify it under it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, version 3.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- *
- * You should have received a copy of the GNU General Public License along with along with
- * this program. If not, see <http://www.gnu.org/licenses/>.
- */
+* Kaleidoscope-Colormap -- Per-layer colormap effect
+* Copyright (C) 2016, 2017, 2018  Keyboard.io, Inc
+*
+* This program is free software: you can redistribute it and/or modify it under it under
+* the terms of the GNU General Public License as published by the Free Software
+* Foundation, version 3.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+* FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+* details.
+*
+* You should have received a copy of the GNU General Public License along with along with
+* this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #pragma once
 
@@ -34,9 +34,6 @@ class ColormapEffectDefy : public Plugin,
   ColormapEffectDefy(void) = default;
   EventHandlerResult onSetup();
 
-  void syncData(Devices device);
-
-
   void max_layers(uint8_t max_);
 
   EventHandlerResult onLayerChange();
@@ -44,7 +41,6 @@ class ColormapEffectDefy : public Plugin,
   void updateColorIndexAtPosition(uint8_t layer, uint16_t position, uint8_t palette_index);
   uint8_t getColorIndexAtPosition(uint8_t layer, uint16_t position);
   LedModeSerializable_Layer &led_mode = ledModeSerializableLayer;
-  void getColorPalette(cRGB output_palette[16]);
   void getLayer(uint8_t layer, uint8_t output_buf[Runtime.device().led_count]);
 
   // This class' instance has dynamic lifetime
@@ -77,6 +73,8 @@ class ColormapEffectDefy : public Plugin,
  private:
   static uint8_t max_layers_;
   static uint16_t map_base_;
+  void updateKeyMapCommunications(Packet &packet);
+  void updateUnderGlowCommunications(Packet &packet);
 };
 }  // namespace plugin
 }  // namespace kaleidoscope
