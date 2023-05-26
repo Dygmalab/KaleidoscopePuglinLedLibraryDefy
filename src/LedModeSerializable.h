@@ -55,7 +55,7 @@ class LedModeSerializable {
     uint32_t id;
     uint16_t step;
     uint8_t brightness;
-    uint8_t delay_ms;
+    uint16_t delay_ms;
   } base_settings;
 
   explicit LedModeSerializable(uint32_t id) {
