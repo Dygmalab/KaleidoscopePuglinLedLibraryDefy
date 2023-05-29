@@ -94,9 +94,8 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
     // LEDManagement::set_led_at(ledColor_red, 30);
     // LEDManagement::set_led_at(ledColor_red, 31);
     // LEDManagement::set_updated(true);
+    
   }
-#endif
-  uint8_t r_, g_, b_, w_;
 
  private:
   float BatteryDrainFactor   = 0.3;
@@ -135,6 +134,7 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
     breathe.w    = 0;
     return breathe;
   }
+#endif
 };
 
 static LedModeSerializable_BatteryStatus ledModeSerializableBatteryStatus{CRC32_STR("LedModeSerializable_BatteryStatus")};
