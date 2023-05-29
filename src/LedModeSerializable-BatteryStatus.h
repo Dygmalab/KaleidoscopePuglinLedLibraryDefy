@@ -36,14 +36,10 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
 #endif
 
 #ifdef KEYSCANNER
-  RGBW ledColor_green  = {0, 0, 0, 0};
-  RGBW ledColor_yellow = {0, 0, 0, 0};
-  RGBW ledColor_orange = {0, 0, 0, 0};
-  RGBW ledColor_red    = {0, 0, 0, 0};
-
+  RGBW ledColor_green, ledColor_yellow, ledColor_orange, ledColor_red = {0, 0, 0, 0};
 
   void update() override {
-
+    //TODO: Erase the breathe effect and orange color if it is not being used.
     //Set the battery status
     batteryStatus -= BatteryDrainFactor;
     if (batteryStatus < 0) {
@@ -52,49 +48,40 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
 
     if (batteryStatus > 90) {
 
-      ledColor_green  = {0, 255, 0, 0};
-      ledColor_yellow = {0, 255, 0, 0};
-      ledColor_orange = {0, 255, 0, 0};
-      ledColor_red    = {0, 255, 0, 0};
+      ledColor_green  = green;
+      ledColor_yellow = green;
+      ledColor_red    = green;
+      //ledColor_orange = {0, 255, 0, 0};
 
     } else if (batteryStatus > 75) {
 
-      ledColor_green  = breathe(static_cast<uint16_t>(80));  //HSV Green values
-      ledColor_yellow = {0, 255, 0, 0};
-      ledColor_orange = {0, 255, 0, 0};
-      ledColor_red    = {0, 255, 0, 0};
+      //ledColor_green  = breathe(static_cast<uint16_t>(80));  //HSV Green values
+      ledColor_green  = ledToggle(green);
+      ledColor_yellow = green;
+      ledColor_red    = green;
+      //ledColor_orange = {0, 255, 0, 0};
 
     } else if (batteryStatus > 60) {
 
-      ledColor_green  = {0, 0, 0, 0};
-      ledColor_yellow = {255, 255, 0, 0};
-      ledColor_orange = {255, 255, 0, 0};
-      ledColor_red    = {255, 255, 0, 0};
+      ledColor_green  = ledOff;
+      ledColor_yellow = yellow;
+      ledColor_red    = yellow;
+      //ledColor_orange = {255, 255, 0, 0};
 
     } else if (batteryStatus > 45) {
 
-      ledColor_yellow = breathe(static_cast<uint16_t>(40));  //HSV Yellow values
-      ledColor_orange = {255, 255, 0, 0};
-      ledColor_red    = {255, 255, 0, 0};
-
-    } else if (batteryStatus > 30) {
-
-      ledColor_yellow = {0, 0, 0, 0};
-      ledColor_orange = {255, 140, 0, 0};
-      ledColor_red    = {255, 255, 0, 0};
-
-    } else if (batteryStatus > 25) {
-
-      ledColor_orange = breathe(static_cast<uint16_t>(24));  //HSV Orange values
-      ledColor_orange = {255, 140, 0, 0};
+      //ledColor_yellow = breathe(static_cast<uint16_t>(40));  //HSV Yellow values
+      ledColor_yellow = ledToggle(yellow);
+      ledColor_red    = yellow;
+      //ledColor_orange = {255, 255, 0, 0};
 
     } else if (batteryStatus > 15) {
 
-      ledColor_orange = {0, 0, 0, 0};
-      ledColor_red    = {255, 0, 0, 0};
+      ledColor_yellow = ledOff;
+      ledColor_red    = red;
 
     } else {
-      ledColor_red = breathe(static_cast<uint16_t>(10));  //HSV Red values
+      ledColor_red = ledToggle(red);
     }
 
     /*Column effect*/
@@ -102,19 +89,19 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
     LEDManagement::set_led_at(ledColor_yellow, 13);
     LEDManagement::set_led_at(ledColor_red, 20);
 
-    /*Cool effect*/
-    LEDManagement::set_led_at(ledColor_green, 27);
-    LEDManagement::set_led_at(ledColor_green, 34);
+    // /*Cool effect*/
+    // LEDManagement::set_led_at(ledColor_green, 27);
+    // LEDManagement::set_led_at(ledColor_green, 34);
 
-    LEDManagement::set_led_at(ledColor_yellow, 28);
-    LEDManagement::set_led_at(ledColor_yellow, 33);
+    // LEDManagement::set_led_at(ledColor_yellow, 28);
+    // LEDManagement::set_led_at(ledColor_yellow, 33);
 
-    LEDManagement::set_led_at(ledColor_orange, 29);
-    LEDManagement::set_led_at(ledColor_orange, 32);
+    // LEDManagement::set_led_at(ledColor_orange, 29);
+    // LEDManagement::set_led_at(ledColor_orange, 32);
 
-    LEDManagement::set_led_at(ledColor_red, 30);
-    LEDManagement::set_led_at(ledColor_red, 31);
-    LEDManagement::set_updated(true);
+    // LEDManagement::set_led_at(ledColor_red, 30);
+    // LEDManagement::set_led_at(ledColor_red, 31);
+    // LEDManagement::set_updated(true);
   }
 #endif
   uint8_t r_, g_, b_, w_;
@@ -125,6 +112,20 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
   uint16_t rainbowHue        = 0;
   uint16_t rainbowSaturation = 255;
   uint8_t rainbowLastUpdate  = 0;
+  RGBW green                 = {0, 255, 0, 0};
+  RGBW yellow                = {255, 255, 0, 0};
+  RGBW red                   = {255, 0, 0, 0};
+  RGBW ledOff                = {0, 0, 0, 0};
+
+  RGBW ledToggle(RGBW ledColor) {
+    static bool ledStatus = false;
+    RGBW color            = ledOff;
+    if (ledStatus) {
+      color = ledColor;
+    }
+    ledStatus = !ledStatus;
+    return color;
+  }
 
   RGBW breathe(uint16_t breatheHue) {
     uint8_t i                  = ((uint16_t)to_ms_since_boot(get_absolute_time())) >> 4;
