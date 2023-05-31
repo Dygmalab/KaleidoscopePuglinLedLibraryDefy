@@ -5,6 +5,7 @@
 
 #ifdef KEYSCANNER
 #include "LEDManagement.hpp"
+#include "RFGW_communications.h"
 #endif
 
 class LedModeSerializable_BatteryStatus : public LedModeSerializable {
@@ -30,83 +31,62 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
 
   void update() override {
 
-    RGBW ledColor_green, ledColor_yellow, ledColor_orange, ledColor_red = {0, 0, 0, 0};
-    //TODO: Erase the breathe effect and orange color if it is not being used.
-    //Set the battery status
-    batteryStatus -= BatteryDrainFactor;
-    if (batteryStatus < 0) {
-      batteryStatus = 100;
-    }
+    RGBW first_cell, second_cell, fourth_cell, third_cell, status_led = {0, 0, 0, 0};
 
-    if (batteryStatus > 90) {
+    //TODO: Move the 4200 to a const
+    uint8_t batteryLevel = (float)RFGWCommunication::getBatteryLevel() / (float)4200 * 100;
+    if (batteryLevel > 90) {
 
-      ledColor_green  = green;
-      ledColor_yellow = green;
-      ledColor_red    = green;
-      //ledColor_orange = {0, 255, 0, 0};
+      first_cell  = green;
+      second_cell = green;
+      third_cell  = green;
+    } else if (batteryLevel > 75) {
 
-    } else if (batteryStatus > 75) {
+      first_cell  = ledToggle(green);
+      second_cell = green;
+      third_cell  = green;
 
-      //ledColor_green  = breathe(static_cast<uint16_t>(80));  //HSV Green values
-      ledColor_green  = ledToggle(green);
-      ledColor_yellow = green;
-      ledColor_red    = green;
-      //ledColor_orange = {0, 255, 0, 0};
+    } else if (batteryLevel > 50) {
 
-    } else if (batteryStatus > 50) {
+      first_cell  = ledOff;
+      second_cell = yellow;
+      third_cell  = yellow;
 
-      ledColor_green  = ledOff;
-      ledColor_yellow = yellow;
-      ledColor_red    = yellow;
-      //ledColor_orange = {255, 255, 0, 0};
+    } else if (batteryLevel > 35) {
 
-    } else if (batteryStatus > 35) {
+      first_cell  = ledOff;
+      second_cell = ledToggle(yellow);
+      third_cell  = yellow;
 
-      //ledColor_yellow = breathe(static_cast<uint16_t>(40));  //HSV Yellow values
-      ledColor_yellow = ledToggle(yellow);
-      ledColor_red    = yellow;
-      //ledColor_orange = {255, 255, 0, 0};
-
-    } else if (batteryStatus > 15) {
-
-      ledColor_yellow = ledOff;
-      ledColor_red    = red;
+    } else if (batteryLevel > 15) {
+      first_cell  = ledOff;
+      second_cell = ledOff;
+      third_cell  = red;
 
     } else {
-      ledColor_red = ledToggle(red);
+      first_cell  = ledOff;
+      second_cell = ledOff;
+      third_cell  = ledToggle(red);
     }
 
     /*Column effect*/
-    LEDManagement::set_led_at(ledColor_green, 6);
-    LEDManagement::set_led_at(ledColor_yellow, 13);
-    LEDManagement::set_led_at(ledColor_red, 20);
+    if (RFGWCommunication::getBatteryStatus() == RFGWCommunication::CHARGING) {
+      status_led = yellow;
+    } else if (RFGWCommunication::getBatteryStatus() == RFGWCommunication::CHARGING_DONE) {
+      status_led = green;
+    }
 
-    // /*Cool effect*/
-    // LEDManagement::set_led_at(ledColor_green, 27);
-    // LEDManagement::set_led_at(ledColor_green, 34);
-
-    // LEDManagement::set_led_at(ledColor_yellow, 28);
-    // LEDManagement::set_led_at(ledColor_yellow, 33);
-
-    // LEDManagement::set_led_at(ledColor_orange, 29);
-    // LEDManagement::set_led_at(ledColor_orange, 32);
-
-    // LEDManagement::set_led_at(ledColor_red, 30);
-    // LEDManagement::set_led_at(ledColor_red, 31);
-    // LEDManagement::set_updated(true);
-    
+    LEDManagement::set_led_at(status_led, 0);
+    LEDManagement::set_led_at(first_cell, 6);
+    LEDManagement::set_led_at(second_cell, 13);
+    LEDManagement::set_led_at(third_cell, 20);
   }
 
  private:
-  float BatteryDrainFactor   = 0.3;
-  float batteryStatus        = 100;
-  uint16_t rainbowHue        = 0;
-  uint16_t rainbowSaturation = 255;
-  uint8_t rainbowLastUpdate  = 0;
-  const RGBW green           = {0, 255, 0, 0};
-  const RGBW yellow          = {255, 255, 0, 0};
-  const RGBW red             = {255, 0, 0, 0};
-  const RGBW ledOff          = {0, 0, 0, 0};
+  static constexpr RGBW green  = {0, 255, 0, 0};
+  static constexpr RGBW yellow = {255, 255, 0, 0};
+  static constexpr RGBW red    = {255, 0, 0, 0};
+  static constexpr RGBW ledOff = {0, 0, 0, 0};
 
   RGBW ledToggle(RGBW ledColor) {
     static bool ledStatus = false;
@@ -116,23 +96,6 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
     }
     ledStatus = !ledStatus;
     return color;
-  }
-
-  RGBW breathe(uint16_t breatheHue) {
-    uint8_t i                  = ((uint16_t)to_ms_since_boot(get_absolute_time())) >> 4;
-    uint16_t breatheSaturation = 255;
-
-    if (i & 0x80) {
-      i = 255 - i;
-    }
-    i           = i << 1;
-    uint8_t ii  = (i * i) >> 8;
-    uint8_t iii = (ii * i) >> 8;
-
-    i            = (((3 * (uint16_t)(ii)) - (2 * (uint16_t)(iii))) / 2) + 80;
-    RGBW breathe = LEDManagement::HSVtoRGB(breatheHue, breatheSaturation, i);
-    breathe.w    = 0;
-    return breathe;
   }
 #endif
 };
