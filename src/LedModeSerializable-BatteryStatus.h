@@ -31,10 +31,11 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
 
   void update() override {
 
-    RGBW first_cell, second_cell, fourth_cell, third_cell, status_led = {0, 0, 0, 0};
+    RGBW first_cell, second_cell, third_cell, status_led = {0, 0, 0, 0};
 
-    //TODO: Move the 4200 to a const
-    uint8_t batteryLevel = (float)RFGWCommunication::getBatteryLevel() / (float)4200 * 100;
+    //TODO: Move the 4.2 to a const
+    uint8_t batteryLevel = RFGWCommunication::getBatteryLevel() / 42;
+    printf("%f %i\n", batteryLevel, RFGWCommunication::getBatteryLevel());
     if (batteryLevel > 90) {
 
       first_cell  = green;
