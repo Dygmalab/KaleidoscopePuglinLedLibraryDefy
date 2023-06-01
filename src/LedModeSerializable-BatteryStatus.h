@@ -35,7 +35,6 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
 
     //TODO: Move the 4.2 to a const
     uint8_t batteryLevel = RFGWCommunication::getBatteryLevel() / 42;
-    printf("%f %i\n", batteryLevel, RFGWCommunication::getBatteryLevel());
     if (batteryLevel > 90) {
 
       first_cell  = green;
