@@ -5,7 +5,7 @@
 
 #ifdef KEYSCANNER
 #include "LEDManagement.hpp"
-#include "RFGW_communications.h"
+#include "BatteryManagement.hpp"
 #endif
 
 class LedModeSerializable_BatteryStatus : public LedModeSerializable {
@@ -33,8 +33,7 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
 
     RGBW first_cell, second_cell, fourth_cell, third_cell, status_led = {0, 0, 0, 0};
 
-    //TODO: Move the 4200 to a const
-    uint8_t batteryLevel = (float)RFGWCommunication::getBatteryLevel() / (float)4200 * 100;
+    uint8_t batteryLevel = BatteryManagement::getBatteryLevel();
     if (batteryLevel > 90) {
 
       first_cell  = green;
@@ -70,9 +69,9 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
     }
 
     /*Column effect*/
-    if (RFGWCommunication::getBatteryStatus() == RFGWCommunication::CHARGING) {
+    if (BatteryManagement::getBatteryStatus() == BatteryManagement::CHARGING) {
       status_led = yellow;
-    } else if (RFGWCommunication::getBatteryStatus() == RFGWCommunication::CHARGING_DONE) {
+    } else if (BatteryManagement::getBatteryStatus() == BatteryManagement::CHARGING_DONE) {
       status_led = green;
     }
 
