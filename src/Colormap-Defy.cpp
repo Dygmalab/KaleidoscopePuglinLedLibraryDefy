@@ -149,7 +149,7 @@ EventHandlerResult ColormapEffectDefy::onSetup() {
 void ColormapEffectDefy::updateKeyMapCommunications(Packet &packet) {
   uint8_t layerColors[Runtime.device().led_count];
   uint8_t baseKeymapIndex;
-  if (packet.header.device == KEYSCANNER_DEFY_RIGHT || packet.header.device == Communications_protocol::RF_DEFY_RIGHT) {
+  if (packet.header.device == KEYSCANNER_DEFY_RIGHT || packet.header.device == Communications_protocol::RF_DEFY_RIGHT || packet.header.device == Communications_protocol::BLE_DEFY_RIGHT) {
     baseKeymapIndex = Runtime.device().ledDriver().key_matrix_leds;
   } else {
     baseKeymapIndex = 0;
@@ -186,7 +186,7 @@ void ColormapEffectDefy::updateKeyMapCommunications(Packet &packet) {
 void ColormapEffectDefy::updateUnderGlowCommunications(Packet &packet) {
   uint8_t layerColors[Runtime.device().led_count];
   uint8_t baseUnderGlowIndex;
-  if (packet.header.device == KEYSCANNER_DEFY_RIGHT || packet.header.device == Communications_protocol::RF_DEFY_RIGHT) {
+  if (packet.header.device == KEYSCANNER_DEFY_RIGHT || packet.header.device == Communications_protocol::RF_DEFY_RIGHT || packet.header.device == Communications_protocol::BLE_DEFY_RIGHT) {
     baseUnderGlowIndex = (Runtime.device().ledDriver().key_matrix_leds) * 2 +
                          Runtime.device().ledDriver().underglow_leds;
   } else {
