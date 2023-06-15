@@ -138,8 +138,9 @@ EventHandlerResult ColormapEffectDefy::onSetup() {
                                 }));
   Communications.callbacks.bind(BRIGHTNESS, ([](Packet packet) {
                                   packet.header.command = BRIGHTNESS;
-                                  packet.header.size    = 1;
+                                  packet.header.size    = 2;
                                   packet.data[0]        = Runtime.device().ledDriver().getBrightness();
+                                  packet.data[1]        = Runtime.device().ledDriver().getBrightnessUG();
                                   Communications.sendPacket(packet);
                                 }));
   return EventHandlerResult::OK;
