@@ -14,6 +14,19 @@ class LedModeSerializable_Breathe : public LedModeSerializable {
   }
 
 #ifdef KEYSCANNER
+  uint8_t serialize(uint8_t *output) const override {
+    uint8_t index     = LedModeSerializable::serialize(output);
+    breatheLastUpdate = input[index];
+    breatheHue        = input[++index];
+    return ++index;
+  }
+
+  uint8_t deSerialize(const uint8_t *input) override {
+    uint8_t index     = LedModeSerializable::deSerialize(input);
+    breatheLastUpdate = input[index];
+    breatheHue        = input[++index];
+    return ++index;
+  }
   void update() override {
     uint8_t i = ((uint16_t)to_ms_since_boot(get_absolute_time())) >> 4;
 
