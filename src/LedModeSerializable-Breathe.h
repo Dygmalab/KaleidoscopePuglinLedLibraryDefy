@@ -15,7 +15,7 @@ class LedModeSerializable_Breathe : public LedModeSerializable {
 
   uint8_t serialize(uint8_t *output) const override {
     uint8_t index   = LedModeSerializable::serialize(output);
-    output[index]   = breatheLastUpdate;
+    output[index]   = breatheSaturation;
     output[++index] = breatheHue;
     return ++index;
   }
@@ -24,7 +24,7 @@ class LedModeSerializable_Breathe : public LedModeSerializable {
   
   uint8_t deSerialize(const uint8_t *input) override {
     uint8_t index     = LedModeSerializable::deSerialize(input);
-    breatheLastUpdate = input[index];
+    breatheSaturation = input[index];
     breatheHue        = input[++index];
     return ++index;
   }
