@@ -218,6 +218,7 @@ void ColormapEffectDefy::updateUnderGlowCommunications(Packet &packet) {
     swap = !swap;
   }
   memcpy(&packet.data[1], message, packet.header.size - 1);
+  packet.header.size -= 2;
   Communications.sendPacket(packet);
 }
 
