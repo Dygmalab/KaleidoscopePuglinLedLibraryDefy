@@ -34,48 +34,51 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
     RGBW first_cell, second_cell, fourth_cell, third_cell, status_led = {0, 0, 0, 0};
 
     uint8_t batteryLevel = BatteryManagement::getBatteryLevel();
-    if (batteryLevel > 90) {
+    if (batteryLevel > 70) {
 
       first_cell  = green;
       second_cell = green;
       third_cell  = green;
-    } else if (batteryLevel > 75) {
+    } else if (batteryLevel > 40) {
 
-      first_cell  = ledToggle(green);
+      first_cell  = ledOff;
       second_cell = green;
       third_cell  = green;
 
-    } else if (batteryLevel > 50) {
-
-      first_cell  = ledOff;
-      second_cell = yellow;
-      third_cell  = yellow;
-
-    } else if (batteryLevel > 35) {
-
-      first_cell  = ledOff;
-      second_cell = ledToggle(yellow);
-      third_cell  = yellow;
-
-    } else if (batteryLevel > 15) {
+    } else if (batteryLevel > 10) {
       first_cell  = ledOff;
       second_cell = ledOff;
-      third_cell  = red;
+      third_cell  = green;
 
     } else {
       first_cell  = ledOff;
       second_cell = ledOff;
-      third_cell  = ledToggle(red);
+      third_cell  = red;
     }
 
     /*Column effect*/
-    if (BatteryManagement::getBatteryStatus() == BatteryManagement::CHARGING) {
-      status_led = yellow;
-    } else if (BatteryManagement::getBatteryStatus() == BatteryManagement::CHARGING_DONE) {
-      status_led = green;
-    }
+    if (BatteryManagement::getBatteryStatus() == BatteryManagement::CHARGING_DONE) {
+      
+      first_cell  = green;
+      second_cell = green;
+      third_cell  = green;
 
-    LEDManagement::set_led_at(status_led, 0);
+    } else if (BatteryManagement::getBatteryStatus() == BatteryManagement::CHARGING) {
+      if (batteryLevel > 70) {
+        first_cell  = ledToggle(green);
+        second_cell = green;
+        third_cell  = green;
+      } else if (batteryLevel > 40) {
+        first_cell  = ledOff;
+        second_cell = ledToggle(green);
+        third_cell  = green;
+      } else if (batteryLevel > 0) {
+        first_cell  = ledOff;
+        second_cell = ledOff;
+        third_cell  = ledToggle(green);
+      }
+    }
+    
     LEDManagement::set_led_at(first_cell, 6);
     LEDManagement::set_led_at(second_cell, 13);
     LEDManagement::set_led_at(third_cell, 20);
