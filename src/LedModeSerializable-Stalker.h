@@ -120,7 +120,7 @@ class LedModeSerializable_Stalker : public LedModeSerializable {
     for (int i = 0; i < KeyScanner::ROWS; ++i) {
       uint8_t rows = data[i];
       for (int j = 0; j < KeyScanner::COLS; ++j) {
-        if (rows >> j & 1 && map[i][j] == 0x00)
+        if (rows >> j & 1 )
           map[i][j] = 0xFF;
 
         uint8_t &step = map[i][j];
