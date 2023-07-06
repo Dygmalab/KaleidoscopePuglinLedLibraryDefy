@@ -23,10 +23,12 @@
 namespace kaleidoscope {
 namespace plugin {
 class LEDBatteryStatusDefy : public Plugin,
-                          public LEDModeInterface,
-                          public LedModeCommunication {
+                             public LEDModeInterface,
+                             public LedModeCommunication {
  public:
-  LEDBatteryStatusDefy(){}
+  LEDBatteryStatusDefy() {
+    ledModeSerializableBatteryStatus.base_settings.delay_ms = 255;
+  }
 
   LedModeSerializable_BatteryStatus &led_mode = ledModeSerializableBatteryStatus;
 
