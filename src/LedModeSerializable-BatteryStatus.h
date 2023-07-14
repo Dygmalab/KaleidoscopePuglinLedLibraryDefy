@@ -31,7 +31,7 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
 
   void update() override {
 
-    RGBW first_cell, second_cell, fourth_cell, third_cell, status_led = {0, 0, 0, 0};
+    RGBW first_cell, second_cell, fourth_cell, third_cell = {0, 0, 0, 0};
 
     uint8_t batteryLevel = BatteryManagement::getBatteryLevel();
     if (batteryLevel > 70) {
@@ -58,27 +58,46 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
 
     /*Column effect*/
     if (BatteryManagement::getBatteryStatus() == BatteryManagement::CHARGING_DONE) {
-      
+
       first_cell  = green;
       second_cell = green;
       third_cell  = green;
 
     } else if (BatteryManagement::getBatteryStatus() == BatteryManagement::CHARGING) {
-      if (batteryLevel > 70) {
-        first_cell  = ledToggle(green);
-        second_cell = green;
-        third_cell  = green;
-      } else if (batteryLevel > 40) {
-        first_cell  = ledOff;
-        second_cell = ledToggle(green);
-        third_cell  = green;
-      } else if (batteryLevel > 0) {
+      static enum {
+        FIRST_CELL,
+        SECOND_CELL,
+        THIRD_CELL,
+        NO_CELL,
+      } currentCell = NO_CELL;
+      switch (currentCell) {
+      case NO_CELL:
         first_cell  = ledOff;
         second_cell = ledOff;
-        third_cell  = ledToggle(green);
+        third_cell  = ledOff;
+        currentCell = THIRD_CELL;
+        break;
+      case THIRD_CELL:
+        first_cell  = ledOff;
+        second_cell = ledOff;
+        third_cell  = green;
+        currentCell = SECOND_CELL;
+        break;
+      case SECOND_CELL:
+        first_cell  = ledOff;
+        second_cell = green;
+        third_cell  = green;
+        currentCell = FIRST_CELL;
+        break;
+      case FIRST_CELL:
+        first_cell  = green;
+        second_cell = green;
+        third_cell  = green;
+        currentCell = NO_CELL;
+        break;
       }
     }
-    
+
     LEDManagement::set_led_at(first_cell, 6);
     LEDManagement::set_led_at(second_cell, 13);
     LEDManagement::set_led_at(third_cell, 20);
