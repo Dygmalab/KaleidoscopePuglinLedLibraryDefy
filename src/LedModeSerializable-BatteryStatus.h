@@ -30,9 +30,9 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
 #ifdef KEYSCANNER
 
   void update() override {
-
+    BatteryManagement::resetSleepTimer();
     RGBW first_cell, second_cell, fourth_cell, third_cell = {0, 0, 0, 0};
-
+    
     uint8_t batteryLevel = BatteryManagement::getBatteryLevel();
     if (batteryLevel > 70) {
 
@@ -101,6 +101,7 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
     LEDManagement::set_led_at(first_cell, 6);
     LEDManagement::set_led_at(second_cell, 13);
     LEDManagement::set_led_at(third_cell, 20);
+    BatteryManagement::releaseMutex();
   }
 
  private:
