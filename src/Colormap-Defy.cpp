@@ -28,7 +28,7 @@ namespace plugin {
 uint16_t ColormapEffectDefy::map_base_;
 uint8_t ColormapEffectDefy::max_layers_;
 uint8_t ColormapEffectDefy::top_layer_;
-
+ColormapEffectDefy::Side sides{0};
 void ColormapEffectDefy::max_layers(uint8_t max_) {
   if (map_base_ != 0)
     return;
@@ -139,13 +139,47 @@ EventHandlerResult ColormapEffectDefy::onSetup() {
   Communications.callbacks.bind(BRIGHTNESS, ([](Packet packet) {
                                   packet.header.command = BRIGHTNESS;
                                   packet.header.size    = 2;
-                                  packet.data[0]        = Runtime.device().ledDriver().getBrightness();
-                                  packet.data[1]        = Runtime.device().ledDriver().getBrightnessUG();
-                                  Communications.sendPacket(packet);
+                                  if (sides.rigth_side_connected && sides.left_side_connected) {
+                                    packet.header.device = Communications_protocol::KEYSCANNER_DEFY_LEFT;
+                                    packet.data[0]       = Runtime.device().ledDriver().getBrightness();
+                                    packet.data[1]       = Runtime.device().ledDriver().getBrightnessUG();
+                                    Communications.sendPacket(packet);
+                                    packet.header.device = Communications_protocol::KEYSCANNER_DEFY_RIGHT;
+                                    Communications.sendPacket(packet);
+                                  } else if (packet.header.device == Communications_protocol::RF_DEFY_LEFT || packet.header.device == Communications_protocol::RF_DEFY_RIGHT) {
+                                    packet.header.device = Communications_protocol::RF_DEFY_LEFT;
+                                    packet.data[0]       = Runtime.device().ledDriver().getBrightnessUGWireless();
+                                    packet.data[1]       = Runtime.device().ledDriver().getBrightnessWireless();
+                                    Communications.sendPacket(packet);
+                                    packet.header.device = Communications_protocol::RF_DEFY_RIGHT;
+                                    Communications.sendPacket(packet);
+                                  } else {
+                                    packet.header.device = Communications_protocol::BLE_DEFY_LEFT;
+                                    packet.data[0]       = Runtime.device().ledDriver().getBrightnessUGWireless();
+                                    packet.data[1]       = Runtime.device().ledDriver().getBrightnessWireless();
+                                    Communications.sendPacket(packet);
+                                    packet.header.device = Communications_protocol::BLE_DEFY_RIGHT;
+                                    Communications.sendPacket(packet);
+                                  }
                                 }));
   return EventHandlerResult::OK;
 }
 
+void ColormapEffectDefy::setSideStatus(Communications_protocol::Devices side) {
+  if (side == Communications_protocol::KEYSCANNER_DEFY_RIGHT) {
+    sides.rigth_side_connected = true;
+  }
+  if (side == Communications_protocol::KEYSCANNER_DEFY_LEFT) {
+    sides.left_side_connected = true;
+  }
+
+  if (side == Communications_protocol::RF_DEFY_RIGHT || side == Communications_protocol::BLE_DEFY_RIGHT) {
+    sides.rigth_side_connected = false;
+  }
+  if (side == Communications_protocol::RF_DEFY_LEFT || side == Communications_protocol::BLE_DEFY_LEFT) {
+    sides.left_side_connected = false;
+  }
+}
 
 void ColormapEffectDefy::updateKeyMapCommunications(Packet &packet) {
   uint8_t layerColors[Runtime.device().led_count];

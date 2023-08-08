@@ -69,7 +69,11 @@ class ColormapEffectDefy : public Plugin,
 
  public:
   static uint8_t getMaxLayers();
-
+  static void setSideStatus(Communications_protocol::Devices side);
+  struct Side {
+    bool left_side_connected;
+    bool rigth_side_connected;
+  }; 
  private:
   static uint8_t max_layers_;
   static uint16_t map_base_;
