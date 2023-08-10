@@ -74,6 +74,13 @@ class ColormapEffectDefy : public Plugin,
     bool left_side_connected;
     bool rigth_side_connected;
   }; 
+  struct DeviceID
+  {
+    Communications_protocol::Devices right;
+    Communications_protocol::Devices left;
+  };
+  
+  static void sendPacketToDevice(Communications_protocol::Devices device, bool connected);
  private:
   static uint8_t max_layers_;
   static uint16_t map_base_;
