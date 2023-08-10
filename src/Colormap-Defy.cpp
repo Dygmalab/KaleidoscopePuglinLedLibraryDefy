@@ -140,42 +140,42 @@ EventHandlerResult ColormapEffectDefy::onSetup() {
   Communications.callbacks.bind(BRIGHTNESS, ([](Packet packet) {
                                   packet.header.command = BRIGHTNESS;
                                   packet.header.size    = 2;
-
+                                  NRF_LOG_DEBUG("DEVICE ID RIGHT: %i DEVICE ID LEFT: %i", deviceId.right, deviceId.left);
                                   if (sides_colormap.rigth_side_connected && sides_colormap.left_side_connected) {
-                                    packet.header.device = Communications_protocol::KEYSCANNER_DEFY_LEFT;
+                                    packet.header.device = deviceId.right;
                                     packet.data[0]       = Runtime.device().ledDriver().getBrightness();
                                     packet.data[1]       = Runtime.device().ledDriver().getBrightnessUG();
                                     Communications.sendPacket(packet);
-                                    packet.header.device = Communications_protocol::KEYSCANNER_DEFY_RIGHT;
+                                    packet.header.device = deviceId.left;
                                     Communications.sendPacket(packet);
                                     NRF_LOG_DEBUG("BOTH DEVICES CONNECTED");
                                     NRF_LOG_DEBUG("BRIGHTNESS SENT: %i", packet.data[0]);
                                   } else if (!sides_colormap.rigth_side_connected && sides_colormap.left_side_connected) {
-                                    packet.header.device = Communications_protocol::RF_DEFY_RIGHT;
+                                    packet.header.device = deviceId.right;
                                     packet.data[0]       = Runtime.device().ledDriver().getBrightnessWireless();
                                     packet.data[1]       = Runtime.device().ledDriver().getBrightnessUGWireless();
                                     Communications.sendPacket(packet);
-                                    packet.header.device = Communications_protocol::KEYSCANNER_DEFY_LEFT;
+                                    packet.header.device = deviceId.left;
                                     Communications.sendPacket(packet);
                                     NRF_LOG_DEBUG("RIGHT SIDE DISCONNECTED");
                                     NRF_LOG_DEBUG("LEFT SIDE CONNECTED");
                                     NRF_LOG_DEBUG("BRIGHTNESS SENT: %i", packet.data[0]);
                                   } else if(sides_colormap.rigth_side_connected && !sides_colormap.left_side_connected){
-                                    packet.header.device = Communications_protocol::KEYSCANNER_DEFY_RIGHT;
+                                    packet.header.device = deviceId.right;
                                     packet.data[0]       = Runtime.device().ledDriver().getBrightnessWireless();
                                     packet.data[1]       = Runtime.device().ledDriver().getBrightnessUGWireless();
                                     Communications.sendPacket(packet);
-                                    packet.header.device = Communications_protocol::RF_DEFY_LEFT;
+                                    packet.header.device = deviceId.left;
                                     Communications.sendPacket(packet);
                                     NRF_LOG_DEBUG("RIGHT SIDE CONNECTED");
                                     NRF_LOG_DEBUG("LEFT SIDE DISCONNECTED");
                                     NRF_LOG_DEBUG("BRIGHTNESS SENT: %i", packet.data[0]);
                                   } else if(!sides_colormap.rigth_side_connected && !sides_colormap.left_side_connected){
-                                    packet.header.device = Communications_protocol::RF_DEFY_RIGHT;
+                                    packet.header.device = deviceId.right;
                                     packet.data[0]       = Runtime.device().ledDriver().getBrightnessWireless();
                                     packet.data[1]       = Runtime.device().ledDriver().getBrightnessUGWireless();
                                     Communications.sendPacket(packet);
-                                    packet.header.device = Communications_protocol::RF_DEFY_LEFT;
+                                    packet.header.device = deviceId.left;
                                     Communications.sendPacket(packet);
                                     NRF_LOG_DEBUG("SIDES DISCONNECTED");
                                     NRF_LOG_DEBUG("BRIGHTNESS SENT: %i", packet.data[0]);
