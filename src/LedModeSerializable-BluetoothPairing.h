@@ -29,9 +29,19 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
     return ++index;
   }
 
+#ifdef NEURON_WIRED
+  void update() override {
+  }
+#endif
+
 #ifdef KEYSCANNER
   void update() override {
-    LEDManagement::set_all_leds({255, 255, 255, 255});
+    for (uint8_t i = 1; i < 6 ; ++i) {
+      LEDManagement::set_led_at(blue, i);
+    }
+    for (uint8_t i = 8; i < 13 ; ++i) {
+      LEDManagement::set_led_at(red, i);
+    }
     LEDManagement::set_updated(true);
   }
 #endif
@@ -40,6 +50,11 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
   uint8_t paired_channel_id_;
 
  private:
+  static constexpr RGBW white  = {0, 0, 0, 255};
+  static constexpr RGBW green  = {0, 255, 0, 0};
+  static constexpr RGBW blue  = {0, 0, 255, 0};
+  static constexpr RGBW red    = {255, 0, 0, 0};
+  static constexpr RGBW ledOff = {0, 0, 0, 0};
 };
 
 static LedModeSerializable_BluetoothPairing
