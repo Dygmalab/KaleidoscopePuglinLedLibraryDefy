@@ -26,5 +26,12 @@ void LEDBluetoothPairingDefy::TransientLEDMode::onActivate(void) {
 void LEDBluetoothPairingDefy::TransientLEDMode::update(void) {
   parent_->led_mode.update();
 }
+void LEDBluetoothPairingDefy::setPairedChannels(uint8_t channel) {
+  ledModeSerializableBluetoothPairing.paired_channels_ = channel;
+}
+void LEDBluetoothPairingDefy::setConnectedChannel(uint8_t channel) {
+  ledModeSerializableBluetoothPairing.connected_channel_id_ = channel;
+}
 }  // namespace plugin
 }  // namespace kaleidoscope
+kaleidoscope::plugin::LEDBluetoothPairingDefy ledBluetoothPairingDefy;

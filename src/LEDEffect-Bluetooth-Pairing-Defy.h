@@ -27,10 +27,13 @@ class LEDBluetoothPairingDefy : public Plugin,
                           public LedModeCommunication {
  public:
   LEDBluetoothPairingDefy(){
-    led_mode.base_settings.delay_ms = 100;
+    led_mode.base_settings.delay_ms = 50;
   }
   LedModeSerializable_BluetoothPairing &led_mode = ledModeSerializableBluetoothPairing;
 
+  void setPairedChannels(uint8_t channel);
+
+  void setConnectedChannel(uint8_t channel);
   // This class' instance has dynamic lifetime
   //
   class TransientLEDMode : public LEDMode {
@@ -49,7 +52,9 @@ class LEDBluetoothPairingDefy : public Plugin,
 
    private:
     const LEDBluetoothPairingDefy *parent_;
+    uint8_t paired_channels_;
   };
 };
 }  // namespace plugin
 }  // namespace kaleidoscope
+extern kaleidoscope::plugin::LEDBluetoothPairingDefy ledBluetoothPairingDefy;
