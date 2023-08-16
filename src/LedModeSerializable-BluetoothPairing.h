@@ -6,6 +6,7 @@
 #ifdef KEYSCANNER
 #include "LEDManagement.hpp"
 #include "debug_print.h"
+#include <vector>
 #endif
 
 class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
@@ -43,18 +44,23 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
       bool bit = ( paired_channels_>> i) & 1; // Leer el bit en la posición i usando desplazamiento y AND
 
       if (bit) {
-        // Si el bit está en 1, hacer algo (por ejemplo, imprimir un mensaje)
-        DBG_PRINTF_TRACE("BIT %i EN 1", i);
+        key_color[i] = white;
+        is_paired[i] = 1;
       } else {
-        // Si el bit está en 0, hacer algo diferente (por ejemplo, imprimir un mensaje diferente)
-        DBG_PRINTF_TRACE("BIT %i EN 0", i);
+        key_color[i] = blue;
+        is_paired[i] = 0;
       }
     }
     for (uint8_t i = 1; i < 6 ; ++i) {
-      LEDManagement::set_led_at(blue, i);
+      LEDManagement::set_led_at(key_color[i], i);
+      if (is_paired[i] == 1){
+        LEDManagement::set_led_at(red, i+7);
+      } else{
+        LEDManagement::set_led_at(ledOff, i+7);
+      }
     }
-    for (uint8_t i = 8; i < 13 ; ++i) {
-      LEDManagement::set_led_at(red, i);
+    if (connected_channel_id_ != NOT_CONNECTED && connected_channel_id_ < 5){
+      LEDManagement::set_led_at(green, connected_channel_id_ + 1);
     }
     LEDManagement::set_updated(true);
   }
@@ -69,6 +75,11 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
   static constexpr RGBW blue  = {0, 0, 255, 0};
   static constexpr RGBW red    = {255, 0, 0, 0};
   static constexpr RGBW ledOff = {0, 0, 0, 0};
+  enum Channels : uint8_t {
+    NOT_CONNECTED = 5
+  };
+  std::vector<RGBW> key_color{5};
+  std::vector<uint8_t> is_paired{5};
 };
 
 static LedModeSerializable_BluetoothPairing
