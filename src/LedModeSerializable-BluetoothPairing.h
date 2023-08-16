@@ -5,6 +5,7 @@
 
 #ifdef KEYSCANNER
 #include "LEDManagement.hpp"
+#include "debug_print.h"
 #endif
 
 class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
@@ -36,6 +37,19 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
 
 #ifdef KEYSCANNER
   void update() override {
+    DBG_PRINTF_TRACE("PAIRED CHANNELD IDS %i", paired_channels_);
+    DBG_PRINTF_TRACE("CONNECTED CHANNEL ID %i", connected_channel_id_);
+    for (int i = 7; i >= 0; i--) { // Iterar a través de cada bit
+      bool bit = ( paired_channels_>> i) & 1; // Leer el bit en la posición i usando desplazamiento y AND
+
+      if (bit) {
+        // Si el bit está en 1, hacer algo (por ejemplo, imprimir un mensaje)
+        DBG_PRINTF_TRACE("BIT %i EN 1", i);
+      } else {
+        // Si el bit está en 0, hacer algo diferente (por ejemplo, imprimir un mensaje diferente)
+        DBG_PRINTF_TRACE("BIT %i EN 0", i);
+      }
+    }
     for (uint8_t i = 1; i < 6 ; ++i) {
       LEDManagement::set_led_at(blue, i);
     }
