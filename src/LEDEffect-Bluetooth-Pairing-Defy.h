@@ -34,6 +34,8 @@ class LEDBluetoothPairingDefy : public Plugin,
   void setPairedChannels(uint8_t channel);
 
   void setConnectedChannel(uint8_t channel);
+
+  void setAvertisingModeOn(bool is_activated);
   // This class' instance has dynamic lifetime
   //
   class TransientLEDMode : public LEDMode {
