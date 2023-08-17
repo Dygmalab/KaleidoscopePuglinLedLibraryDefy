@@ -28,7 +28,7 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
     paired_channels_                     = input[index];
     connected_channel_id_                     = input[++index];
     advertising_id                     = input[++index];
-    base_settings.delay_ms = 20;
+    base_settings.delay_ms = 10;
     return ++index;
   }
 
@@ -70,6 +70,7 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
     LEDManagement::set_updated(true);
   }
   void breathe(uint8_t channel_id){
+    static uint32_t lastExecutionTime  = 0;
     uint8_t i = ((uint16_t)to_ms_since_boot(get_absolute_time())) >> 4;
 
     if (i & 0x80) {
@@ -82,9 +83,28 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
 
     i = (((3 * (uint16_t)(ii)) - (2 * (uint16_t)(iii))) / 2) + 80;
 
-    RGBW breathe = LEDManagement::HSVtoRGB(160, 200, i);
+    RGBW breathe = LEDManagement::HSVtoRGB(160, 220, i);
     breathe.w    = 0;
     LEDManagement::set_led_at(breathe, channel_id);
+    if(underglow_led_id > 88){
+      underglow_led_id = 35;
+/*      for (int j = 35; j < 88; ++j) {
+        LEDManagement::set_led_at(ledOff, j);
+      }*/
+    }
+    LEDManagement::set_led_at(blue, underglow_led_id);
+    if ((uint16_t)to_ms_since_boot(get_absolute_time()) - lastExecutionTime >= 30){
+      lastExecutionTime = (uint16_t)to_ms_since_boot(get_absolute_time());
+      if(underglow_led_id - 1 != 34){
+        LEDManagement::set_led_at(ledOff, underglow_led_id - 1);
+      }
+      if (underglow_led_id + 1 > 88){
+        LEDManagement::set_led_at(blue, 35);
+      } else {
+        LEDManagement::set_led_at(blue, underglow_led_id + 1);
+      }
+      underglow_led_id++;
+    }
   }
 #endif
   uint8_t paired_channels_;
@@ -104,6 +124,7 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
   };
   std::vector<RGBW> key_color{5};
   std::vector<uint8_t> is_paired{5};
+  uint8_t underglow_led_id = 35;
 #endif
 };
 
