@@ -71,6 +71,7 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
   bool advertising;
 
  private:
+#ifdef KEYSCANNER
   static constexpr RGBW white  = {0, 0, 0, 255};
   static constexpr RGBW green  = {0, 255, 0, 0};
   static constexpr RGBW blue  = {0, 0, 255, 0};
@@ -81,6 +82,7 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
   };
   std::vector<RGBW> key_color{5};
   std::vector<uint8_t> is_paired{5};
+#endif
 };
 
 static LedModeSerializable_BluetoothPairing
