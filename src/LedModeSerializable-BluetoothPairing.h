@@ -18,7 +18,7 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
     uint8_t index   = LedModeSerializable::serialize(output);
     output[index]   = paired_channels_;
     output[++index] = connected_channel_id_;
-    output[++index] = advertising;
+    output[++index] = advertising_id;
     return ++index;
   }
 
@@ -26,7 +26,7 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
     uint8_t index          = LedModeSerializable::deSerialize(input);
     paired_channels_                     = input[index];
     connected_channel_id_                     = input[++index];
-    advertising                     = input[++index];
+    advertising_id                     = input[++index];
     base_settings.delay_ms = 100;
     return ++index;
   }
@@ -40,7 +40,7 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
   void update() override {
     DBG_PRINTF_TRACE("PAIRED CHANNELD IDS %i", paired_channels_);
     DBG_PRINTF_TRACE("CONNECTED CHANNEL ID %i", connected_channel_id_);
-    DBG_PRINTF_TRACE("ADVERSITING MODE: %i", advertising);
+    DBG_PRINTF_TRACE("ADVERSITING MODE: %i", advertising_id);
     for (int i = 7; i >= 0; i--) { // Iterar a través de cada bit
       bool bit = ( paired_channels_>> i) & 1; // Leer el bit en la posición i usando desplazamiento y AND
 
@@ -68,7 +68,7 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
 #endif
   uint8_t paired_channels_;
   uint8_t connected_channel_id_;
-  bool advertising;
+  uint8_t advertising_id;
 
  private:
 #ifdef KEYSCANNER

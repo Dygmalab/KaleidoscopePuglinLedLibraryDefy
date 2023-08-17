@@ -32,8 +32,8 @@ void LEDBluetoothPairingDefy::setPairedChannels(uint8_t channel) {
 void LEDBluetoothPairingDefy::setConnectedChannel(uint8_t channel) {
   ledModeSerializableBluetoothPairing.connected_channel_id_ = channel;
 }
-void LEDBluetoothPairingDefy::setAvertisingModeOn(bool is_activated) {
-  ledModeSerializableBluetoothPairing.advertising = is_activated;
+void LEDBluetoothPairingDefy::setAvertisingModeOn(uint8_t advertising_id_) {
+  ledModeSerializableBluetoothPairing.advertising_id = advertising_id_;
 }
 }  // namespace plugin
 }  // namespace kaleidoscope
