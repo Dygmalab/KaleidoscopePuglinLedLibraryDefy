@@ -27,7 +27,7 @@ class LEDBluetoothPairingDefy : public Plugin,
                           public LedModeCommunication {
  public:
   LEDBluetoothPairingDefy(){
-    led_mode.base_settings.delay_ms = 50;
+    led_mode.base_settings.delay_ms = 20;
   }
   LedModeSerializable_BluetoothPairing &led_mode = ledModeSerializableBluetoothPairing;
 

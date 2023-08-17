@@ -7,6 +7,7 @@
 #include "LEDManagement.hpp"
 #include "debug_print.h"
 #include <vector>
+#include "LedModeSerializable-Breathe.h"
 #endif
 
 class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
@@ -27,7 +28,7 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
     paired_channels_                     = input[index];
     connected_channel_id_                     = input[++index];
     advertising_id                     = input[++index];
-    base_settings.delay_ms = 100;
+    base_settings.delay_ms = 20;
     return ++index;
   }
 
@@ -63,7 +64,27 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
     if (connected_channel_id_ != NOT_CONNECTED && connected_channel_id_ < 5){
       LEDManagement::set_led_at(green, connected_channel_id_ + 1);
     }
+    if(advertising_id != NOT_ON_ADVERTISING){
+      breathe(advertising_id);
+    }
     LEDManagement::set_updated(true);
+  }
+  void breathe(uint8_t channel_id){
+    uint8_t i = ((uint16_t)to_ms_since_boot(get_absolute_time())) >> 4;
+
+    if (i & 0x80) {
+      i = 255 - i;
+    }
+
+    i           = i << 1;
+    uint8_t ii  = (i * i) >> 8;
+    uint8_t iii = (ii * i) >> 8;
+
+    i = (((3 * (uint16_t)(ii)) - (2 * (uint16_t)(iii))) / 2) + 80;
+
+    RGBW breathe = LEDManagement::HSVtoRGB(160, 200, i);
+    breathe.w    = 0;
+    LEDManagement::set_led_at(breathe, channel_id);
   }
 #endif
   uint8_t paired_channels_;
@@ -78,7 +99,8 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
   static constexpr RGBW red    = {255, 0, 0, 0};
   static constexpr RGBW ledOff = {0, 0, 0, 0};
   enum Channels : uint8_t {
-    NOT_CONNECTED = 5
+    NOT_CONNECTED = 5,
+    NOT_ON_ADVERTISING
   };
   std::vector<RGBW> key_color{5};
   std::vector<uint8_t> is_paired{5};
