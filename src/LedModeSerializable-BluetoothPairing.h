@@ -42,15 +42,15 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
     DBG_PRINTF_TRACE("PAIRED CHANNELD IDS %i", paired_channels_);
     DBG_PRINTF_TRACE("CONNECTED CHANNEL ID %i", connected_channel_id_);
     DBG_PRINTF_TRACE("ADVERSITING MODE: %i", advertising_id);
-    for (int i = 7; i >= 0; i--) { // Iterar a través de cada bit
+    for (int i = 4; i >= 0; i--) { // Iterar a través de cada bit
       bool bit = ( paired_channels_>> i) & 1; // Leer el bit en la posición i usando desplazamiento y AND
 
       if (bit) {
-        key_color[i] = white;
-        is_paired[i] = 1;
+        key_color[i+1] = white;
+        is_paired[i+1] = 1;
       } else {
-        key_color[i] = blue;
-        is_paired[i] = 0;
+        key_color[i+1] = blue;
+        is_paired[i+1] = 0;
       }
     }
     for (uint8_t i = 1; i < 6 ; ++i) {
@@ -63,12 +63,14 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
     }
     if (connected_channel_id_ != NOT_CONNECTED && connected_channel_id_ < 5){
       LEDManagement::set_led_at(green, connected_channel_id_ + 1);
+      LEDManagement::set_led_at(red, connected_channel_id_ + 8);
     }
     if(advertising_id != NOT_ON_ADVERTISING){
       breathe(advertising_id);
     }
     LEDManagement::set_updated(true);
   }
+
   void breathe(uint8_t channel_id){
     static uint32_t lastExecutionTime  = 0;
     uint8_t i = ((uint16_t)to_ms_since_boot(get_absolute_time())) >> 4;
@@ -85,7 +87,7 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
 
     RGBW breathe = LEDManagement::HSVtoRGB(160, 220, i);
     breathe.w    = 0;
-    LEDManagement::set_led_at(breathe, channel_id);
+    LEDManagement::set_led_at(breathe, channel_id + 1);
     if(underglow_led_id > 88){
       underglow_led_id = 35;
 /*      for (int j = 35; j < 88; ++j) {
