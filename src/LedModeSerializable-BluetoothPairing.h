@@ -123,7 +123,7 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
         LEDManagement::set_all_leds(ledOff);
       } else {
         LEDManagement::set_all_leds(blue);
-
+      }
       ledIsOn = !ledIsOn; // Toggle LED state
       lastExecutionTime = currentTime;
       counter++;
