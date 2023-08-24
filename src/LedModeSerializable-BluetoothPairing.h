@@ -20,6 +20,9 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
     output[index]   = paired_channels_;
     output[++index] = connected_channel_id_;
     output[++index] = advertising_id;
+    output[++index] = defy_id_side;
+    output[++index] = erease_done;
+
     return ++index;
   }
 
@@ -28,6 +31,8 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
     paired_channels_                     = input[index];
     connected_channel_id_                     = input[++index];
     advertising_id                     = input[++index];
+    defy_id_side                     = input[++index];
+    erease_done                     = input[++index];
     base_settings.delay_ms = 10;
     return ++index;
   }
@@ -85,7 +90,7 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
 
     i = (((3 * (uint16_t)(ii)) - (2 * (uint16_t)(iii))) / 2) + 80;
 
-    RGBW breathe = LEDManagement::HSVtoRGB(160, 220, i);
+    RGBW breathe = LEDManagement::HSVtoRGB(160, 255, i);
     breathe.w    = 0;
     LEDManagement::set_led_at(breathe, channel_id + 1);
     if(underglow_led_id > 88){
@@ -94,7 +99,7 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
         LEDManagement::set_led_at(ledOff, j);
       }*/
     }
-    LEDManagement::set_led_at(blue, underglow_led_id);
+    LEDManagement::set_led_at(breathe, underglow_led_id);
     if ((uint16_t)to_ms_since_boot(get_absolute_time()) - lastExecutionTime >= 30){
       lastExecutionTime = (uint16_t)to_ms_since_boot(get_absolute_time());
       if(underglow_led_id - 1 != 34){
@@ -112,6 +117,8 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
   uint8_t paired_channels_;
   uint8_t connected_channel_id_;
   uint8_t advertising_id;
+  uint8_t erease_done;
+  uint8_t defy_id_side;
 
  private:
 #ifdef KEYSCANNER
