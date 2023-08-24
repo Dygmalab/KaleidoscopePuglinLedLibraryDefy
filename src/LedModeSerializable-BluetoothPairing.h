@@ -49,8 +49,8 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
     DBG_PRINTF_TRACE("CONNECTED CHANNEL ID %i", connected_channel_id_);
     DBG_PRINTF_TRACE("ADVERSITING MODE: %i", advertising_id);
     DBG_PRINTF_TRACE("EREASE MODE: %i", erease_done);
-    for (int i = 4; i >= 0; i--) { // Iterar a través de cada bit
-      bool bit = ( paired_channels_>> i) & 1; // Leer el bit en la posición i usando desplazamiento y AND
+    for (int i = 4; i >= 0; i--) { //Iterate through each bit
+      bool bit = ( paired_channels_>> i) & 1; // Read the bit at position i using shift and AND
 
       if (bit) {
         key_color[i+1] = white;
