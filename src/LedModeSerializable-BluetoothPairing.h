@@ -193,8 +193,8 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
     NOT_CONNECTED = 5,
     NOT_ON_ADVERTISING
   };
-  RGBW key_color[5];
-  uint8_t is_paired[5];
+  std::vector<RGBW> key_color{5};
+  std::vector<uint8_t> is_paired{5};
   uint8_t underglow_led_id = 35;
 #endif
 };
