@@ -33,8 +33,7 @@ class LedModeSerializable_LowBattery : public LedModeSerializable {
     static uint32_t lastExecutionTime = 0;
     static bool blinking              = false;
 
-    uint32_t currentTime = to_ms_since_boot(get_absolute_time());  // Obtiene el tiempo actual en milisegundos
-    // Verificar si han pasado al menos 5 segundos desde la última ejecución
+    uint32_t currentTime = to_ms_since_boot(get_absolute_time());
     if (currentTime - lastExecutionTime >= 83) {
       LEDManagement::set_all_leds(ledToggle(red));
       lastExecutionTime = currentTime;
