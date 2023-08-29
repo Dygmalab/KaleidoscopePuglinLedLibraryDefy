@@ -33,29 +33,27 @@ class LedModeSerializable_LowBattery : public LedModeSerializable {
     static uint32_t lastExecutionTime = 0;
     static bool blinking              = false;
 
-    uint32_t currentTime = to_ms_since_boot(get_absolute_time());  // Obtiene el tiempo actual en milisegundos
-    // Verificar si han pasado al menos 5 segundos desde la última ejecución
+    uint32_t currentTime = to_ms_since_boot(get_absolute_time());
+
     if (currentTime - lastExecutionTime >= 83) {
-      LEDManagement::set_all_leds(ledToggle(red));
+      blinking = !blinking;
+
+      if (blinking) {
+        LEDManagement::set_all_leds(red);
+      } else {
+        LEDManagement::set_all_leds(ledOff);
+      }
+
       lastExecutionTime = currentTime;
     }
+    LEDManagement::set_updated(true);
   }
 
+
  private:
-  static constexpr RGBW green  = {0, 255, 0, 0};
-  static constexpr RGBW yellow = {255, 255, 0, 0};
   static constexpr RGBW red    = {255, 0, 0, 0};
   static constexpr RGBW ledOff = {0, 0, 0, 0};
 
-  RGBW ledToggle(RGBW ledColor) {
-    static bool ledStatus = false;
-    RGBW color            = ledOff;
-    if (ledStatus) {
-      color = ledColor;
-    }
-    ledStatus = !ledStatus;
-    return color;
-  }
 #endif
 };
 
