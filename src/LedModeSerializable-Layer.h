@@ -2,8 +2,8 @@
 
 #include "LedModeSerializable.h"
 #include "cstdio"
-#include "debug_print.h"
 #ifdef KEYSCANNER
+#include "debug_print.h"
 #include "BatteryManagement.hpp"
 #endif
 
