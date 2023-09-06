@@ -15,6 +15,7 @@ class LedModeSerializable_Layer : public LedModeSerializable {
   uint8_t serialize(uint8_t *output) const override {
     uint8_t index = LedModeSerializable::serialize(output);
     output[index] = layer;
+    output[++index] = fade_is_on;
     return ++index;
   }
 
@@ -22,6 +23,7 @@ class LedModeSerializable_Layer : public LedModeSerializable {
     uint8_t index = LedModeSerializable::deSerialize(input);
     base_settings.delay_ms = 10;
     layer         = input[index];
+    fade_is_on    = input[++index];
     return ++index;
   }
 #ifdef NEURON_WIRED
@@ -39,7 +41,7 @@ class LedModeSerializable_Layer : public LedModeSerializable {
     static bool reached_ug_brightness = false;
     static bool reached_bl_brightness = false;
 
-    DBG_PRINTF_TRACE("BatteryManagement::brightness_bl != 0: %f", BatteryManagement::brightness_bl);
+    DBG_PRINTF_TRACE("RECEIVE fade_is_on: %i", fade_is_on);
 
     float min_led_driver_brightness;
     float min_underglow_brightness;
@@ -115,7 +117,7 @@ class LedModeSerializable_Layer : public LedModeSerializable {
 
 #endif
   uint8_t layer;
-  uint8_t previous_layer = 0xff;
+  uint8_t fade_is_on = false;
 
  private:
 };
