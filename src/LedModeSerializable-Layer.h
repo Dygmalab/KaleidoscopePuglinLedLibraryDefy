@@ -60,12 +60,6 @@ class LedModeSerializable_Layer : public LedModeSerializable {
       actualLayer = LEDManagement::layers.at(this->layer);
     }
 
-    if (layer != previous_layer) {
-      DBG_PRINTF_TRACE("layer: %i", layer);
-      DBG_PRINTF_TRACE("previous_layer: %i", previous_layer);
-      previous_layer = layer;
-    }
-
     for (uint8_t i = 0; i < NUMBER_OF_LEDS; i++) {
       RGBW &color = LEDManagement::palette[actualLayer.leds[i]];
       LEDManagement::set_led_at(color, i);
@@ -117,7 +111,7 @@ class LedModeSerializable_Layer : public LedModeSerializable {
 
 #endif
   uint8_t layer;
-  uint8_t fade_is_on = false;
+  uint8_t fade_is_on;
 
  private:
 };
