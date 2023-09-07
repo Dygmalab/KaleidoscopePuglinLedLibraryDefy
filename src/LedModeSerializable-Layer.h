@@ -40,9 +40,6 @@ class LedModeSerializable_Layer : public LedModeSerializable {
     constexpr float top_ug_brightness_level = 0.29f;
     static bool reached_ug_brightness = false;
     static bool reached_bl_brightness = false;
-
-    DBG_PRINTF_TRACE("RECEIVE fade_is_on: %i", fade_is_on);
-
     float min_led_driver_brightness;
     float min_underglow_brightness;
 
@@ -64,7 +61,6 @@ class LedModeSerializable_Layer : public LedModeSerializable {
         min_led_driver_brightness = LEDManagement::get_max_ledDriver_brightness();
         min_underglow_brightness = LEDManagement::get_max_underglow_brightness();
       }
-      DBG_PRINTF_TRACE("min_led_driver_brightness: %f", min_led_driver_brightness);
 
       if (layer != 0) {
         // Denied the brightness control to the battery management for a smooth transition in the fade effect.
@@ -103,7 +99,6 @@ class LedModeSerializable_Layer : public LedModeSerializable {
         BatteryManagement::brightnessHandler(true);
         base_settings.delay_ms = 0;
       }
-      DBG_PRINTF_TRACE("led_driver_brightness: %f", led_driver_brightness);
       LEDManagement::set_ledDriver_brightness(led_driver_brightness);
       LEDManagement::set_underglow_brightness(underglow_brightness);
     } else {
