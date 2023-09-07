@@ -67,15 +67,15 @@ class LedModeSerializable_Layer : public LedModeSerializable {
         BatteryManagement::brightnessHandler(false);
 
         if (!max_reached) {
-          underglow_brightness = std::min(top_ug_brightness_level, underglow_brightness + 0.004f);
+          underglow_brightness = std::min(top_ug_brightness_level, underglow_brightness + 0.014f);
           led_driver_brightness = std::min(top_brightness_level, led_driver_brightness + 0.06f);
 
-          if (led_driver_brightness >= top_brightness_level) {
+          if (led_driver_brightness >= top_brightness_level && underglow_brightness >= top_ug_brightness_level) {
             max_reached = true;
           }
         } else {
           led_driver_brightness = std::max(min_led_driver_brightness, led_driver_brightness - 0.01002f);
-          underglow_brightness = std::max(min_underglow_brightness, underglow_brightness - 0.00105f);
+          underglow_brightness = std::max(min_underglow_brightness, underglow_brightness - 0.00505f);
 
           if (led_driver_brightness <= min_led_driver_brightness) {
             reached_bl_brightness = true;
