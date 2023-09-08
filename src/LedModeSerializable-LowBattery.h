@@ -42,10 +42,8 @@ class LedModeSerializable_LowBattery : public LedModeSerializable {
 
         if (blinking) {
           LEDManagement::set_all_leds(red);
-          DBG_PRINTF_TRACE("PRENDIDOOOOO");
         } else {
           LEDManagement::set_all_leds(ledOff);
-          DBG_PRINTF_TRACE("APAGADOOO");
           counter--;
         }
 
@@ -53,7 +51,6 @@ class LedModeSerializable_LowBattery : public LedModeSerializable {
       }
     } else {
       LEDManagement::set_all_leds(ledOff);
-      DBG_PRINTF_TRACE("APAGADOOO");
     }
 
     LEDManagement::set_updated(true);
