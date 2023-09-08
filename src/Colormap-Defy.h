@@ -42,7 +42,7 @@ class ColormapEffectDefy : public Plugin,
   uint8_t getColorIndexAtPosition(uint8_t layer, uint16_t position);
   LedModeSerializable_Layer &led_mode = ledModeSerializableLayer;
   void getLayer(uint8_t layer, uint8_t output_buf[Runtime.device().led_count]);
-
+  void setFadein(bool fade_status);
   // This class' instance has dynamic lifetime
   //
   class TransientLEDMode : public LEDMode {

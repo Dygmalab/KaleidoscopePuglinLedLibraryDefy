@@ -73,6 +73,10 @@ EventHandlerResult ColormapEffectDefy::onLayerChange() {
   return EventHandlerResult::OK;
 }
 
+void ColormapEffectDefy::setFadein(bool fade_status) {
+  led_mode.fade_is_on = fade_status;
+}
+
 EventHandlerResult ColormapEffectDefy::onFocusEvent(const char *command) {
   const char *expected_command = "colormap.map";
 

@@ -31,29 +31,42 @@ class LedModeSerializable_LowBattery : public LedModeSerializable {
 
   void update() override {
     static uint32_t lastExecutionTime = 0;
-    static bool blinking              = false;
-
+    static bool blinking = false;
     uint32_t currentTime = to_ms_since_boot(get_absolute_time());
 
-    if (currentTime - lastExecutionTime >= 83) {
-      blinking = !blinking;
+    DBG_PRINTF_TRACE("counter: %i", counter);
 
-      if (blinking) {
-        LEDManagement::set_all_leds(red);
-      } else {
-        LEDManagement::set_all_leds(ledOff);
+    if (counter > 0) {
+      if (currentTime - lastExecutionTime >= 73) {
+        blinking = !blinking;
+
+        if (blinking) {
+          LEDManagement::set_all_leds(red);
+          DBG_PRINTF_TRACE("PRENDIDOOOOO");
+        } else {
+          LEDManagement::set_all_leds(ledOff);
+          DBG_PRINTF_TRACE("APAGADOOO");
+          counter--;
+        }
+
+        lastExecutionTime = currentTime;
       }
-
-      lastExecutionTime = currentTime;
+    } else {
+      LEDManagement::set_all_leds(ledOff);
+      DBG_PRINTF_TRACE("APAGADOOO");
     }
+
     LEDManagement::set_updated(true);
   }
 
-
+  void resetCounter() {
+    counter = 5;
+  }
+ public:
+  uint8_t counter = 5;
  private:
   static constexpr RGBW red    = {255, 0, 0, 0};
   static constexpr RGBW ledOff = {0, 0, 0, 0};
-
 #endif
 };
 
