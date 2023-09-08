@@ -59,8 +59,8 @@ class LedModeSerializable_LowBattery : public LedModeSerializable {
     LEDManagement::set_updated(true);
   }
 
-  void setCounter(uint8_t counter_) {
-    counter = counter_;
+  void resetCounter() {
+    counter = 5;
   }
  public:
   uint8_t counter = 5;
