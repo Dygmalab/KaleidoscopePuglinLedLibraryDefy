@@ -53,7 +53,7 @@ class LedModeSerializable_Layer : public LedModeSerializable {
         LEDManagement::set_led_at(color, i);
       }
 
-    if (fade_is_on){
+    if (fade_is_on && BatteryManagement::getBatteryStatus()!=BatteryManagement::CHARGING){
       if (BatteryManagement::brightness_bl!=0){
         min_led_driver_brightness = BatteryManagement::brightness_bl/100;
         min_underglow_brightness = BatteryManagement::brightness_ug/100;
