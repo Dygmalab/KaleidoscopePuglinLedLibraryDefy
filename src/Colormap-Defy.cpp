@@ -239,7 +239,6 @@ void ColormapEffectDefy::updateUnderGlowCommunications(Packet &packet) {
 }
 
     void ColormapEffectDefy::updateBrigthness() {
-        NRF_LOG_DEBUG("Enviando brillo a los lados!!!!!!!");
 
             Packet packet;
             packet.header.command = BRIGHTNESS;
