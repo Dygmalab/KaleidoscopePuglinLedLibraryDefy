@@ -150,7 +150,9 @@ EventHandlerResult ColormapEffectDefy::onSetup() {
                                   auto devicesRight = keyScanner.rightHandDevice();
 
                                   bool checkWiredLeftSide  = (deviceLeft == KEYSCANNER_DEFY_RIGHT || deviceLeft == Communications_protocol::KEYSCANNER_DEFY_LEFT);
-                                  bool checkWiredRightSide = (devicesRight == KEYSCANNER_DEFY_RIGHT || devicesRight == Communications_protocol::KEYSCANNER_DEFY_LEFT);
+                                  bool checkWiredRightSide = (devicesRight == KEYSCANNER_DEFY_RIGHT || devicesRight == Communications_protocol::KEYSCANNER_DEFY_RIGHT);
+                                  NRF_LOG_DEBUG("LEFT STATUS: %i",deviceLeft);
+                                  NRF_LOG_DEBUG("RIGHT STATUS: %i",devicesRight);
                                   if (checkWiredLeftSide && checkWiredRightSide) {
                                     packet.data[0] = ledDriver.getBrightness();
                                     packet.data[1] = ledDriver.getBrightnessUG();
@@ -238,6 +240,22 @@ void ColormapEffectDefy::updateUnderGlowCommunications(Packet &packet) {
   Communications.sendPacket(packet);
 }
 
+    void ColormapEffectDefy::updateBrigthness() {
+        NRF_LOG_DEBUG("Enviando brillo a los lados!!!!!!!");
+
+            Packet packet;
+            packet.header.command = BRIGHTNESS;
+            packet.header.size    = 2;
+            auto& ledDriver = Runtime.device().ledDriver();
+            auto& keyScanner = Runtime.device().keyScanner();
+
+            auto deviceLeft = keyScanner.leftHandDevice();
+            auto devicesRight = keyScanner.rightHandDevice();
+            packet.data[0] = ledDriver.getBrightnessWireless();
+            packet.data[1] = ledDriver.getBrightnessUGWireless();
+            packet.header.device = UNKNOWN;
+            Communications.sendPacket(packet);
+    }
 }  // namespace plugin
 }  // namespace kaleidoscope
 
