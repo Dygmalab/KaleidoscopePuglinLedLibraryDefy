@@ -151,8 +151,6 @@ EventHandlerResult ColormapEffectDefy::onSetup() {
 
                                   bool checkWiredLeftSide  = (deviceLeft == KEYSCANNER_DEFY_RIGHT || deviceLeft == Communications_protocol::KEYSCANNER_DEFY_LEFT);
                                   bool checkWiredRightSide = (devicesRight == KEYSCANNER_DEFY_RIGHT || devicesRight == Communications_protocol::KEYSCANNER_DEFY_RIGHT);
-                                  NRF_LOG_DEBUG("LEFT STATUS: %i",deviceLeft);
-                                  NRF_LOG_DEBUG("RIGHT STATUS: %i",devicesRight);
                                   if (checkWiredLeftSide && checkWiredRightSide) {
                                     packet.data[0] = ledDriver.getBrightness();
                                     packet.data[1] = ledDriver.getBrightnessUG();
