@@ -31,11 +31,7 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
 
   void update() override {
     RGBW first_cell, second_cell, fourth_cell, third_cell = {0, 0, 0, 0};
-    constexpr float top_brightness_level = 0.7f;
-    constexpr float top_ug_brightness_level = 0.29f;
     BatteryManagement::brightnessHandler(false);
-    LEDManagement::set_ledDriver_brightness(top_brightness_level);
-    LEDManagement::set_underglow_brightness(top_ug_brightness_level);
     uint8_t batteryLevel = BatteryManagement::getBatteryLevel();
     if (batteryLevel > 70) {
 
