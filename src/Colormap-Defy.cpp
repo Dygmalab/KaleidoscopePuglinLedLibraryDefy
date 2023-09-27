@@ -238,18 +238,31 @@ void ColormapEffectDefy::updateUnderGlowCommunications(Packet &packet) {
   Communications.sendPacket(packet);
 }
 
-    void ColormapEffectDefy::updateBrigthness() {
+    void ColormapEffectDefy::updateBrigthness(bool updateWiredBrightness, bool setMaxBrightness) {
 
+      Packet packet;
+      packet.header.command = BRIGHTNESS;
+      packet.header.size = 2;
+
+      auto& ledDriver = Runtime.device().ledDriver();
+
+      if (updateWiredBrightness) {
+        packet.data[0] = setMaxBrightness ? 200 : ledDriver.getBrightness();
+        packet.data[1] = ledDriver.getBrightnessUG();
+      } else {
+        packet.data[0] = setMaxBrightness ? 200 : ledDriver.getBrightnessWireless();
+        packet.data[1] = ledDriver.getBrightnessUGWireless();
+      }
+
+      packet.header.device = UNKNOWN;
+      Communications.sendPacket(packet);
+    }
+    void ColormapEffectDefy::turnOffLeds() {
             Packet packet;
             packet.header.command = BRIGHTNESS;
             packet.header.size    = 2;
-            auto& ledDriver = Runtime.device().ledDriver();
-            auto& keyScanner = Runtime.device().keyScanner();
-
-            auto deviceLeft = keyScanner.leftHandDevice();
-            auto devicesRight = keyScanner.rightHandDevice();
-            packet.data[0] = ledDriver.getBrightnessWireless();
-            packet.data[1] = ledDriver.getBrightnessUGWireless();
+            packet.data[0] = 0;
+            packet.data[1] = 0;
             packet.header.device = UNKNOWN;
             Communications.sendPacket(packet);
     }
