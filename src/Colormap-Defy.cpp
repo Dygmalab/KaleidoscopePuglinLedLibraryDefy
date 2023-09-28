@@ -150,13 +150,13 @@ EventHandlerResult ColormapEffectDefy::onSetup() {
                                   auto& ledDriver = Runtime.device().ledDriver();
 
                                   auto deviceLeft = keyScanner.leftHandDevice();
-                                  if (deviceLeft != 0){
+                                  if (deviceLeft != UNKNOWN){
                                     previous_left_id = deviceLeft;
                                   } else {
                                     deviceLeft = previous_left_id;
                                   }
                                   auto devicesRight = keyScanner.rightHandDevice();
-                                  if (devicesRight != 0){
+                                  if (devicesRight != UNKNOWN){
                                     previous_right_id = devicesRight;
                                   } else {
                                     devicesRight = previous_right_id;
