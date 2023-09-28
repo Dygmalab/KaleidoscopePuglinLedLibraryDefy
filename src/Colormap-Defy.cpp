@@ -161,6 +161,7 @@ EventHandlerResult ColormapEffectDefy::onSetup() {
                                   } else {
                                     devicesRight = previous_right_id;
                                   }
+                                  NRF_LOG_DEBUG("deviceLeft: %i, devicesRight: %i",deviceLeft,devicesRight);
                                   id_devices.right = devicesRight;
                                   id_devices.left = deviceLeft;
                                   bool checkWiredLeftSide  = (deviceLeft == KEYSCANNER_DEFY_RIGHT || deviceLeft == Communications_protocol::KEYSCANNER_DEFY_LEFT);
