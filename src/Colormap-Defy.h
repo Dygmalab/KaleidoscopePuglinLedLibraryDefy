@@ -45,6 +45,11 @@ class ColormapEffectDefy : public Plugin,
   void setFadein(bool fade_status);
   static void updateBrigthness(bool updateWiredBrightness = false , bool setMaxBrightness = false);
   static void turnOffLeds();
+  struct IdDevices{
+    Communications_protocol::Devices right;
+    Communications_protocol::Devices left;
+  };
+  static IdDevices getDeviceId();
   // This class' instance has dynamic lifetime
   //
   class TransientLEDMode : public LEDMode {
