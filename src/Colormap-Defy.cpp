@@ -28,6 +28,9 @@ namespace plugin {
 uint16_t ColormapEffectDefy::map_base_;
 uint8_t ColormapEffectDefy::max_layers_;
 uint8_t ColormapEffectDefy::top_layer_;
+ColormapEffectDefy::IdDevices id_devices;
+Communications_protocol::Devices previous_left_id = UNKNOWN;
+Communications_protocol::Devices previous_right_id = UNKNOWN;
 void ColormapEffectDefy::max_layers(uint8_t max_) {
   if (map_base_ != 0)
     return;
@@ -147,10 +150,22 @@ EventHandlerResult ColormapEffectDefy::onSetup() {
                                   auto& ledDriver = Runtime.device().ledDriver();
 
                                   auto deviceLeft = keyScanner.leftHandDevice();
+                                  if (deviceLeft != UNKNOWN){
+                                    previous_left_id = deviceLeft;
+                                  } else {
+                                    deviceLeft = previous_left_id;
+                                  }
                                   auto devicesRight = keyScanner.rightHandDevice();
-
+                                  if (devicesRight != UNKNOWN){
+                                    previous_right_id = devicesRight;
+                                  } else {
+                                    devicesRight = previous_right_id;
+                                  }
+                                  NRF_LOG_DEBUG("deviceLeft: %i, devicesRight: %i",deviceLeft,devicesRight);
+                                  id_devices.right = devicesRight;
+                                  id_devices.left = deviceLeft;
                                   bool checkWiredLeftSide  = (deviceLeft == KEYSCANNER_DEFY_RIGHT || deviceLeft == Communications_protocol::KEYSCANNER_DEFY_LEFT);
-                                  bool checkWiredRightSide = (devicesRight == KEYSCANNER_DEFY_RIGHT || devicesRight == Communications_protocol::KEYSCANNER_DEFY_RIGHT);
+                                  bool checkWiredRightSide = (devicesRight == KEYSCANNER_DEFY_RIGHT || devicesRight == Communications_protocol::KEYSCANNER_DEFY_LEFT);
                                   if (checkWiredLeftSide && checkWiredRightSide) {
                                     packet.data[0] = ledDriver.getBrightness();
                                     packet.data[1] = ledDriver.getBrightnessUG();
@@ -265,6 +280,10 @@ void ColormapEffectDefy::updateUnderGlowCommunications(Packet &packet) {
             packet.data[1] = 0;
             packet.header.device = UNKNOWN;
             Communications.sendPacket(packet);
+    }
+
+    ColormapEffectDefy::IdDevices ColormapEffectDefy::getDeviceId() {
+              return id_devices;
     }
 }  // namespace plugin
 }  // namespace kaleidoscope
