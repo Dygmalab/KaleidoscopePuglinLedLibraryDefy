@@ -139,7 +139,6 @@ EventHandlerResult ColormapEffectDefy::onSetup() {
   Communications.callbacks.bind(CONNECTED, ([this](Packet packet) {
                                   updateUnderGlowCommunications(packet);
                                 }));
-  Communications.callbacks.bind(CONNECTED, ([](const Packet &) { ::LEDControl.set_mode(::LEDControl.get_mode_index()); }));
   Communications.callbacks.bind(CONNECTED, ([](const Packet &) {
                                   if (!::LEDControl.isEnabled()) {
                                     Communications_protocol::Packet p{};
