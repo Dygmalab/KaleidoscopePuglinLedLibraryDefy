@@ -132,13 +132,11 @@ EventHandlerResult LEDPaletteThemeDefy::onFocusEvent(const char *command) {
     ::LEDPaletteThemeDefy.updatePaletteColor(i, color);
     i++;
   }
-  Runtime.storage().commit();
 
-  //TODO: move this at flash library
+  Runtime.storage().commit();
   Packet packet{};
   packet.header.device = UNKNOWN;
-  packet.header.command = Communications_protocol::DISCONNECTED;
-  Communications.sendPacket(packet);
+  LEDPaletteThemeDefy::updatePaletteCommunication(packet);
 
   ::LEDControl.refreshAll();
   return EventHandlerResult::EVENT_CONSUMED;

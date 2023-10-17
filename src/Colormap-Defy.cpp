@@ -115,6 +115,16 @@ EventHandlerResult ColormapEffectDefy::onFocusEvent(const char *command) {
   }
 
   Runtime.storage().commit();
+  auto const &keyScanner = Runtime.device().keyScanner();
+  auto deviceLeft = keyScanner.leftHandDevice();
+  auto devicesRight = keyScanner.rightHandDevice();
+  Packet packet{};
+  packet.header.device = deviceLeft;
+  updateKeyMapCommunications(packet);
+  updateUnderGlowCommunications(packet);
+  packet.header.device = devicesRight;
+  updateKeyMapCommunications(packet);
+  updateUnderGlowCommunications(packet);
 
 
   ::LEDControl.refreshAll();
