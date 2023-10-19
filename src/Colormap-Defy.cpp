@@ -254,15 +254,6 @@ void ColormapEffectDefy::updateBrigthness(bool updateWiredBrightness, bool setMa
   packet.header.device = UNKNOWN;
   Communications.sendPacket(packet);
 }
-void ColormapEffectDefy::turnOffLeds() {
-  Packet packet;
-  packet.header.command = BRIGHTNESS;
-  packet.header.size    = 2;
-  packet.data[0]        = 0;
-  packet.data[1]        = 0;
-  packet.header.device  = UNKNOWN;
-  Communications.sendPacket(packet);
-}
 
 }  // namespace plugin
 }  // namespace kaleidoscope
