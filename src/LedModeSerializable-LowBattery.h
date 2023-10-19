@@ -30,38 +30,37 @@ class LedModeSerializable_LowBattery : public LedModeSerializable {
 #ifdef KEYSCANNER
 
   void update() override {
+    constexpr float top_brightness_level = 0.7f;
+    constexpr float top_ug_brightness_level = 0.29f;
     RGBW first_cell, second_cell, third_cell = {0, 0, 0, 0};
+    BatteryManagement::brightnessHandler(false);
+    LEDManagement::set_ledDriver_brightness(top_brightness_level);
+    LEDManagement::set_underglow_brightness(top_ug_brightness_level);
     /*Column effect*/
-    static enum {
-      FIRST_CELL,
-      SECOND_CELL,
-      THIRD_CELL,
-      NO_CELL,
-    } currentCell = NO_CELL;
     switch (currentCell) {
-    case NO_CELL:
+    case CurrentCell::NO_CELL:
       first_cell  = red;
       second_cell = red;
       third_cell  = red;
-      currentCell = THIRD_CELL;
+      currentCell = CurrentCell::THIRD_CELL;
       break;
-    case THIRD_CELL:
+    case CurrentCell::THIRD_CELL:
       first_cell  = ledOff;
       second_cell = red;
       third_cell  = red;
-      currentCell = SECOND_CELL;
+      currentCell = CurrentCell::SECOND_CELL;
       break;
-    case SECOND_CELL:
+    case CurrentCell::SECOND_CELL:
       first_cell  = ledOff;
       second_cell = ledOff;
       third_cell  = red;
-      currentCell = FIRST_CELL;
+      currentCell = CurrentCell::FIRST_CELL;
       break;
-    case FIRST_CELL:
+    case CurrentCell::FIRST_CELL:
       first_cell  = ledOff;
       second_cell = ledOff;
       third_cell  = ledOff;
-      currentCell = NO_CELL;
+      currentCell = CurrentCell::NO_CELL;
       break;
     }
     counter--;
@@ -76,9 +75,17 @@ class LedModeSerializable_LowBattery : public LedModeSerializable {
   }
  public:
   uint8_t counter = 3;
+  enum class CurrentCell {
+    FIRST_CELL,
+    SECOND_CELL,
+    THIRD_CELL,
+    NO_CELL,
+  };
+  CurrentCell currentCell = CurrentCell::NO_CELL;
  private:
   static constexpr RGBW red    = {255, 0, 0, 0};
   static constexpr RGBW ledOff = {0, 0, 0, 0};
+
 #endif
 };
 
