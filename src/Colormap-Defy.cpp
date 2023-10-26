@@ -28,9 +28,7 @@ namespace plugin {
 uint16_t ColormapEffectDefy::map_base_;
 uint8_t ColormapEffectDefy::max_layers_;
 uint8_t ColormapEffectDefy::top_layer_;
-ColormapEffectDefy::IdDevices id_devices;
-Communications_protocol::Devices previous_left_id = UNKNOWN;
-Communications_protocol::Devices previous_right_id = UNKNOWN;
+
 void ColormapEffectDefy::max_layers(uint8_t max_) {
   if (map_base_ != 0)
     return;
@@ -117,6 +115,16 @@ EventHandlerResult ColormapEffectDefy::onFocusEvent(const char *command) {
   }
 
   Runtime.storage().commit();
+  auto const &keyScanner = Runtime.device().keyScanner();
+  auto deviceLeft = keyScanner.leftHandDevice();
+  auto devicesRight = keyScanner.rightHandDevice();
+  Packet packet{};
+  packet.header.device = deviceLeft;
+  updateKeyMapCommunications(packet);
+  updateUnderGlowCommunications(packet);
+  packet.header.device = devicesRight;
+  updateKeyMapCommunications(packet);
+  updateUnderGlowCommunications(packet);
 
 
   ::LEDControl.refreshAll();
@@ -134,47 +142,19 @@ uint8_t ColormapEffectDefy::getMaxLayers() {
 }
 
 EventHandlerResult ColormapEffectDefy::onSetup() {
-  Communications.callbacks.bind(PALETTE_COLORS, ([](Packet packet) { LEDPaletteThemeDefy::updatePaletteCommunication(packet); }));
-  Communications.callbacks.bind(MODE_LED, ([](Packet packet) { ::LEDControl.set_mode(::LEDControl.get_mode_index()); }));
-  Communications.callbacks.bind(LAYER_KEYMAP_COLORS, ([this](Packet packet) {
+  Communications.callbacks.bind(CONNECTED, ([](Packet packet) { LEDPaletteThemeDefy::updatePaletteCommunication(packet); }));
+  Communications.callbacks.bind(CONNECTED, ([this](Packet packet) {
                                   updateKeyMapCommunications(packet);
                                 }));
-  Communications.callbacks.bind(LAYER_UNDERGLOW_COLORS, ([this](Packet packet) {
+  Communications.callbacks.bind(CONNECTED, ([this](Packet packet) {
                                   updateUnderGlowCommunications(packet);
                                 }));
-  Communications.callbacks.bind(BRIGHTNESS, ([](Packet packet) {
-                                  packet.header.command = BRIGHTNESS;
-                                  packet.header.size    = 2;
-
-                                  auto& keyScanner = Runtime.device().keyScanner();
-                                  auto& ledDriver = Runtime.device().ledDriver();
-
-                                  auto deviceLeft = keyScanner.leftHandDevice();
-                                  if (deviceLeft != UNKNOWN){
-                                    previous_left_id = deviceLeft;
-                                  } else {
-                                    deviceLeft = previous_left_id;
+  Communications.callbacks.bind(CONNECTED, ([](const Packet &) {
+                                  if (!::LEDControl.isEnabled()) {
+                                    Communications_protocol::Packet p{};
+                                    p.header.command = Communications_protocol::SLEEP;
+                                    Communications.sendPacket(p);
                                   }
-                                  auto devicesRight = keyScanner.rightHandDevice();
-                                  if (devicesRight != UNKNOWN){
-                                    previous_right_id = devicesRight;
-                                  } else {
-                                    devicesRight = previous_right_id;
-                                  }
-                                  NRF_LOG_DEBUG("deviceLeft: %i, devicesRight: %i",deviceLeft,devicesRight);
-                                  id_devices.right = devicesRight;
-                                  id_devices.left = deviceLeft;
-                                  bool checkWiredLeftSide  = (deviceLeft == KEYSCANNER_DEFY_RIGHT || deviceLeft == Communications_protocol::KEYSCANNER_DEFY_LEFT);
-                                  bool checkWiredRightSide = (devicesRight == KEYSCANNER_DEFY_RIGHT || devicesRight == Communications_protocol::KEYSCANNER_DEFY_LEFT);
-                                  if (checkWiredLeftSide && checkWiredRightSide) {
-                                    packet.data[0] = ledDriver.getBrightness();
-                                    packet.data[1] = ledDriver.getBrightnessUG();
-                                  } else {
-                                    packet.data[0] = ledDriver.getBrightnessWireless();
-                                    packet.data[1] = ledDriver.getBrightnessUGWireless();
-                                  }
-                                  packet.header.device = UNKNOWN;
-                                  Communications.sendPacket(packet);
                                 }));
   return EventHandlerResult::OK;
 }
@@ -194,25 +174,26 @@ void ColormapEffectDefy::updateKeyMapCommunications(Packet &packet) {
     };
     uint8_t paletteColor;
   };
-  uint8_t layer = packet.data[0];
-  getLayer(layer, layerColors);
-  packet.header.command       = LAYER_KEYMAP_COLORS;
-  const uint8_t sizeofMessage = Runtime.device().ledDriver().key_matrix_leds / 2.0 + 0.5;
-  PaletteJoiner message[sizeofMessage];
-  packet.header.size = sizeof(message) + 1;
-  packet.data[0]     = layer;
-  uint8_t k{};
-  bool swap = true;
-  for (int j = 0; j < Runtime.device().ledDriver().key_matrix_leds; ++j) {
-    if (swap) {
-      message[k].firstColor = layerColors[baseKeymapIndex + j];
-    } else {
-      message[k++].secondColor = layerColors[baseKeymapIndex + j];
+  for (uint8_t layer = 0; layer < max_layers_; ++layer) {
+    getLayer(layer, layerColors);
+    packet.header.command       = LAYER_KEYMAP_COLORS;
+    const uint8_t sizeofMessage = Runtime.device().ledDriver().key_matrix_leds / 2.0 + 0.5;
+    PaletteJoiner message[sizeofMessage];
+    packet.header.size = sizeof(message) + 1;
+    packet.data[0]     = layer;
+    uint8_t k{};
+    bool swap = true;
+    for (int j = 0; j < Runtime.device().ledDriver().key_matrix_leds; ++j) {
+      if (swap) {
+        message[k].firstColor = layerColors[baseKeymapIndex + j];
+      } else {
+        message[k++].secondColor = layerColors[baseKeymapIndex + j];
+      }
+      swap = !swap;
     }
-    swap = !swap;
+    memcpy(&packet.data[1], message, packet.header.size - 1);
+    Communications.sendPacket(packet);
   }
-  memcpy(&packet.data[1], message, packet.header.size - 1);
-  Communications.sendPacket(packet);
 }
 
 
@@ -232,59 +213,48 @@ void ColormapEffectDefy::updateUnderGlowCommunications(Packet &packet) {
     };
     uint8_t paletteColor;
   };
-  uint8_t layer = packet.data[0];
-  getLayer(layer, layerColors);
-  packet.header.command       = Communications_protocol::LAYER_UNDERGLOW_COLORS;
-  const uint8_t sizeofMessage = Runtime.device().ledDriver().underglow_leds / 2.0 + 0.5;
-  PaletteJoiner message[sizeofMessage];
-  packet.header.size = sizeof(message) + 1;
-  packet.data[0]     = layer;
-  bool swap          = true;
-  uint8_t k{};
-  for (int j = 0; j < Runtime.device().ledDriver().underglow_leds; ++j) {
-    if (swap) {
-      message[k].firstColor = layerColors[baseUnderGlowIndex + j];
-    } else {
-      message[k++].secondColor = layerColors[baseUnderGlowIndex + j];
+  for (uint8_t layer = 0; layer < max_layers_; ++layer) {
+    getLayer(layer, layerColors);
+    packet.header.command       = Communications_protocol::LAYER_UNDERGLOW_COLORS;
+    const uint8_t sizeofMessage = Runtime.device().ledDriver().underglow_leds / 2.0 + 0.5;
+    PaletteJoiner message[sizeofMessage];
+    packet.header.size = sizeof(message) + 1;
+    packet.data[0]     = layer;
+    bool swap          = true;
+    uint8_t k{};
+    for (int j = 0; j < Runtime.device().ledDriver().underglow_leds; ++j) {
+      if (swap) {
+        message[k].firstColor = layerColors[baseUnderGlowIndex + j];
+      } else {
+        message[k++].secondColor = layerColors[baseUnderGlowIndex + j];
+      }
+      swap = !swap;
     }
-    swap = !swap;
+    memcpy(&packet.data[1], message, packet.header.size - 1);
+    Communications.sendPacket(packet);
   }
-  memcpy(&packet.data[1], message, packet.header.size - 1);
+}
+
+void ColormapEffectDefy::updateBrigthness(bool updateWiredBrightness, bool setMaxBrightness) {
+
+  Packet packet;
+  packet.header.command = BRIGHTNESS;
+  packet.header.size    = 2;
+
+  auto &ledDriver = Runtime.device().ledDriver();
+
+  if (updateWiredBrightness) {
+    packet.data[0] = setMaxBrightness ? 200 : ledDriver.getBrightness();
+    packet.data[1] = ledDriver.getBrightnessUG();
+  } else {
+    packet.data[0] = setMaxBrightness ? 200 : ledDriver.getBrightnessWireless();
+    packet.data[1] = ledDriver.getBrightnessUGWireless();
+  }
+
+  packet.header.device = UNKNOWN;
   Communications.sendPacket(packet);
 }
 
-    void ColormapEffectDefy::updateBrigthness(bool updateWiredBrightness, bool setMaxBrightness) {
-
-      Packet packet;
-      packet.header.command = BRIGHTNESS;
-      packet.header.size = 2;
-
-      auto& ledDriver = Runtime.device().ledDriver();
-
-      if (updateWiredBrightness) {
-        packet.data[0] = setMaxBrightness ? 200 : ledDriver.getBrightness();
-        packet.data[1] = ledDriver.getBrightnessUG();
-      } else {
-        packet.data[0] = setMaxBrightness ? 200 : ledDriver.getBrightnessWireless();
-        packet.data[1] = ledDriver.getBrightnessUGWireless();
-      }
-
-      packet.header.device = UNKNOWN;
-      Communications.sendPacket(packet);
-    }
-    void ColormapEffectDefy::turnOffLeds() {
-            Packet packet;
-            packet.header.command = BRIGHTNESS;
-            packet.header.size    = 2;
-            packet.data[0] = 0;
-            packet.data[1] = 0;
-            packet.header.device = UNKNOWN;
-            Communications.sendPacket(packet);
-    }
-
-    ColormapEffectDefy::IdDevices ColormapEffectDefy::getDeviceId() {
-              return id_devices;
-    }
 }  // namespace plugin
 }  // namespace kaleidoscope
 
