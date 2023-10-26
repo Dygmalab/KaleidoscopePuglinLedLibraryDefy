@@ -45,7 +45,11 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
 
 #ifdef KEYSCANNER
   void update() override {
+    constexpr float top_brightness_level = 0.7f;
+    constexpr float top_ug_brightness_level = 0.29f;
     BatteryManagement::brightnessHandler(false);
+    LEDManagement::set_ledDriver_brightness(top_brightness_level);
+    LEDManagement::set_underglow_brightness(top_ug_brightness_level);
     for (int i = 4; i >= 0; i--) { //Iterate through each bit
       bool bit = ( paired_channels_>> i) & 1; // Read the bit at position i using shift and AND
 
