@@ -35,7 +35,14 @@ class ColormapEffectDefy : public Plugin,
   EventHandlerResult onSetup();
 
   void max_layers(uint8_t max_);
-
+  enum class LedBrightnessControlEffect {
+    NONE,
+    BATTERY_MANAGMENT,
+    FADE_EFFECT,
+    BATTERY_STATUS,
+    BT_LED_EFFECT,
+  };
+  LedBrightnessControlEffect no_led_effect = LedBrightnessControlEffect::NONE;
   EventHandlerResult onLayerChange();
   EventHandlerResult onFocusEvent(const char *command);
   void updateColorIndexAtPosition(uint8_t layer, uint16_t position, uint8_t palette_index);
@@ -43,7 +50,7 @@ class ColormapEffectDefy : public Plugin,
   LedModeSerializable_Layer &led_mode = ledModeSerializableLayer;
   void getLayer(uint8_t layer, uint8_t output_buf[Runtime.device().led_count]);
   void setFadein(bool fade_status);
-  static void updateBrigthness(bool updateWiredBrightness = false , bool setMaxBrightness = false);
+  static void updateBrigthness(LedBrightnessControlEffect led_effect_id = LedBrightnessControlEffect::NONE, bool take_brightness_handler = false, bool updateWiredBrightness = true);
   // This class' instance has dynamic lifetime
   //
   class TransientLEDMode : public LEDMode {
