@@ -53,19 +53,11 @@ class LedModeSerializable_Layer : public LedModeSerializable {
         LEDManagement::set_led_at(color, i);
       }
 
-    if (fade_is_on && BatteryManagement::getBatteryStatus()!=BatteryManagement::CHARGING){
-        //TODO: Obtener el brillo desde el LedManagment.
-      if (BatteryManagement::brightness_bl!=0){
-        min_led_driver_brightness = BatteryManagement::brightness_bl/100;
-        min_underglow_brightness = BatteryManagement::brightness_ug/100;
-      } else{
-        min_led_driver_brightness = LEDManagement::get_max_ledDriver_brightness();
-        min_underglow_brightness = LEDManagement::get_max_underglow_brightness();
-      }
-
+    if (fade_is_on ){
+        LEDManagement::onMount(LEDManagement::LedBrightnessControlEffect::FADE_EFFECT);
+        min_led_driver_brightness = LEDManagement::get_ledDriver_brightness();
+        min_underglow_brightness = LEDManagement::get_underglow_brightness();
       if (layer != 0) {
-        // Denied the brightness control to the battery management for a smooth transition in the fade effect.
-        BatteryManagement::brightnessHandler(false);
 
         if (!max_reached) {
           underglow_brightness = std::min(top_ug_brightness_level, underglow_brightness + 0.014f);
@@ -87,7 +79,7 @@ class LedModeSerializable_Layer : public LedModeSerializable {
           if (reached_ug_brightness && reached_bl_brightness) {
             base_settings.delay_ms = 0;
             reached_ug_brightness = reached_bl_brightness = false;
-            BatteryManagement::brightnessHandler(true);
+            LEDManagement::onDismount(LEDManagement::LedBrightnessControlEffect::FADE_EFFECT);
           }
         }
       } else if (layer == 0) {
@@ -97,7 +89,7 @@ class LedModeSerializable_Layer : public LedModeSerializable {
         reached_ug_brightness = reached_bl_brightness = false;
 
         // Allow battery management to control the battery if it's low.
-        BatteryManagement::brightnessHandler(true);
+        LEDManagement::onDismount(LEDManagement::LedBrightnessControlEffect::FADE_EFFECT);
         base_settings.delay_ms = 0;
       }
       LEDManagement::set_ledDriver_brightness(led_driver_brightness);
