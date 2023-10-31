@@ -21,6 +21,7 @@
 #include <Kaleidoscope-FocusSerial.h>
 #include "kaleidoscope/layers.h"
 #include "LED-Palette-Theme-Defy.h"
+#include "nrf_log.h"
 
 namespace kaleidoscope {
 namespace plugin {
@@ -235,8 +236,8 @@ void ColormapEffectDefy::updateUnderGlowCommunications(Packet &packet) {
   }
 }
 
-void ColormapEffectDefy::updateBrigthness(bool updateWiredBrightness, bool setMaxBrightness) {
-
+void ColormapEffectDefy::updateBrigthness(LedBrightnessControlEffect led_effect_id, bool take_brightness_handler, bool updateWiredBrightness) {
+  NRF_LOG_DEBUG("LED EFFECT ID: %i", static_cast<uint8_t >(led_effect_id));
   Packet packet;
   packet.header.command = BRIGHTNESS;
   packet.header.size    = 2;
@@ -244,13 +245,16 @@ void ColormapEffectDefy::updateBrigthness(bool updateWiredBrightness, bool setMa
   auto &ledDriver = Runtime.device().ledDriver();
 
   if (updateWiredBrightness) {
-    packet.data[0] = setMaxBrightness ? 200 : ledDriver.getBrightness();
+    packet.data[0] = ledDriver.getBrightness();
     packet.data[1] = ledDriver.getBrightnessUG();
+    NRF_LOG_DEBUG("Sending wired brightness");
   } else {
-    packet.data[0] = setMaxBrightness ? 200 : ledDriver.getBrightnessWireless();
+    packet.data[0] = ledDriver.getBrightnessWireless();
     packet.data[1] = ledDriver.getBrightnessUGWireless();
+    NRF_LOG_DEBUG("Sending wireless brightness");
   }
-
+  packet.data[2] = static_cast<uint8_t>(led_effect_id); //LED effect ID.
+  packet.data[3] = take_brightness_handler; // Tell KS that we want to take (or left) brightness control.
   packet.header.device = UNKNOWN;
   Communications.sendPacket(packet);
 }
