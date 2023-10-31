@@ -50,7 +50,7 @@ class ColormapEffectDefy : public Plugin,
   LedModeSerializable_Layer &led_mode = ledModeSerializableLayer;
   void getLayer(uint8_t layer, uint8_t output_buf[Runtime.device().led_count]);
   void setFadein(bool fade_status);
-  static void updateBrigthness(LedBrightnessControlEffect led_effect_id = LedBrightnessControlEffect::NONE, bool take_brightness_handler = false, bool updateWiredBrightness = true);
+  static void updateBrigthness(LedBrightnessControlEffect led_effect_id = LedBrightnessControlEffect::NONE, bool take_brightness_handler = true, bool updateWiredBrightness = true);
   // This class' instance has dynamic lifetime
   //
   class TransientLEDMode : public LEDMode {
