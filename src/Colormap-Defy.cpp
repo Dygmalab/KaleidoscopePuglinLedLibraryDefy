@@ -237,21 +237,18 @@ void ColormapEffectDefy::updateUnderGlowCommunications(Packet &packet) {
 }
 
 void ColormapEffectDefy::updateBrigthness(LedBrightnessControlEffect led_effect_id, bool take_brightness_handler, bool updateWiredBrightness) {
-  NRF_LOG_DEBUG("LED EFFECT ID: %i", static_cast<uint8_t >(led_effect_id));
   Packet packet;
   packet.header.command = BRIGHTNESS;
-  packet.header.size    = 2;
+  packet.header.size    = 4;
 
   auto &ledDriver = Runtime.device().ledDriver();
 
   if (updateWiredBrightness) {
     packet.data[0] = ledDriver.getBrightness();
     packet.data[1] = ledDriver.getBrightnessUG();
-    NRF_LOG_DEBUG("Sending wired brightness");
   } else {
     packet.data[0] = ledDriver.getBrightnessWireless();
     packet.data[1] = ledDriver.getBrightnessUGWireless();
-    NRF_LOG_DEBUG("Sending wireless brightness");
   }
   packet.data[2] = static_cast<uint8_t>(led_effect_id); //LED effect ID.
   packet.data[3] = take_brightness_handler; // Tell KS that we want to take (or left) brightness control.
