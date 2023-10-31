@@ -60,8 +60,6 @@ class LedModeSerializable_Layer : public LedModeSerializable {
           LEDManagement::onMount(LEDManagement::LedBrightnessControlEffect::FADE_EFFECT);
           min_led_driver_brightness = LEDManagement::get_ledDriver_brightness();
           min_underglow_brightness = LEDManagement::get_underglow_brightness();
-          DBG_PRINTF_TRACE("fade_is_on flag = true : min_led_driver_brightness %f ",min_led_driver_brightness);
-          DBG_PRINTF_TRACE("fade_is_on flag = true : min_underglow_brightness %f ",min_underglow_brightness);
           flag = false;
         }
 
@@ -71,20 +69,16 @@ class LedModeSerializable_Layer : public LedModeSerializable {
 
           if (led_driver_brightness >= top_brightness_level && underglow_brightness >= top_ug_brightness_level) {
             max_reached = true;
-            DBG_PRINTF_TRACE("SE ALCANZO EL MAXIMOOOO**********************");
           }
           LEDManagement::set_ledDriver_brightness(led_driver_brightness);
           LEDManagement::set_underglow_brightness(underglow_brightness);
           LEDManagement::set_updated(true);
 
         } else {
-            DBG_PRINTF_TRACE("led_driver_brightness %f : min_led_driver_brightness %f",led_driver_brightness,min_led_driver_brightness);
             if (led_driver_brightness <= min_led_driver_brightness) {
-              DBG_PRINTF_TRACE("Condicion 1 cumplida");
               reached_bl_brightness = true;
             }
             if (underglow_brightness <= min_underglow_brightness) {
-              DBG_PRINTF_TRACE("Condicion 2 cumplida");
               reached_ug_brightness = true;
             }
             if (reached_ug_brightness && reached_bl_brightness) {
@@ -95,8 +89,6 @@ class LedModeSerializable_Layer : public LedModeSerializable {
             if (!(reached_ug_brightness && reached_bl_brightness)){
               led_driver_brightness = std::max(min_led_driver_brightness, led_driver_brightness - 0.01002f);
               underglow_brightness = std::max(min_underglow_brightness, underglow_brightness - 0.00505f);
-              DBG_PRINTF_TRACE("MAx reached, led_driver_brightness %f",led_driver_brightness);
-              DBG_PRINTF_TRACE("MAx reached, underglow_brightness %f",underglow_brightness);
             }
             LEDManagement::set_ledDriver_brightness(led_driver_brightness);
             LEDManagement::set_underglow_brightness(underglow_brightness);
