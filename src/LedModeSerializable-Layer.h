@@ -40,24 +40,30 @@ class LedModeSerializable_Layer : public LedModeSerializable {
     constexpr float top_ug_brightness_level = 0.29f;
     static bool reached_ug_brightness = false;
     static bool reached_bl_brightness = false;
-    float min_led_driver_brightness;
-    float min_underglow_brightness;
+    static float min_led_driver_brightness = LEDManagement::get_ledDriver_brightness();
+    static float min_underglow_brightness = LEDManagement::get_underglow_brightness();
+    static bool flag = true;
 
-      LEDManagement::Layer actualLayer{};
-      if (this->layer < LEDManagement::layers.size()) {
-        actualLayer = LEDManagement::layers.at(this->layer);
-      }
+    LEDManagement::Layer actualLayer{};
+    if (this->layer < LEDManagement::layers.size()) {
+      actualLayer = LEDManagement::layers.at(this->layer);
+    }
 
-      for (uint8_t i = 0; i < NUMBER_OF_LEDS; i++) {
-        RGBW &color = LEDManagement::palette[actualLayer.leds[i]];
-        LEDManagement::set_led_at(color, i);
-      }
+    for (uint8_t i = 0; i < NUMBER_OF_LEDS; i++) {
+      RGBW &color = LEDManagement::palette[actualLayer.leds[i]];
+      LEDManagement::set_led_at(color, i);
+    }
 
     if (fade_is_on ){
-        LEDManagement::onMount(LEDManagement::LedBrightnessControlEffect::FADE_EFFECT);
-        min_led_driver_brightness = LEDManagement::get_ledDriver_brightness();
-        min_underglow_brightness = LEDManagement::get_underglow_brightness();
       if (layer != 0) {
+        if (flag){
+          LEDManagement::onMount(LEDManagement::LedBrightnessControlEffect::FADE_EFFECT);
+          min_led_driver_brightness = LEDManagement::get_ledDriver_brightness();
+          min_underglow_brightness = LEDManagement::get_underglow_brightness();
+          DBG_PRINTF_TRACE("fade_is_on flag = true : min_led_driver_brightness %f ",min_led_driver_brightness);
+          DBG_PRINTF_TRACE("fade_is_on flag = true : min_underglow_brightness %f ",min_underglow_brightness);
+          flag = false;
+        }
 
         if (!max_reached) {
           underglow_brightness = std::min(top_ug_brightness_level, underglow_brightness + 0.014f);
@@ -65,39 +71,48 @@ class LedModeSerializable_Layer : public LedModeSerializable {
 
           if (led_driver_brightness >= top_brightness_level && underglow_brightness >= top_ug_brightness_level) {
             max_reached = true;
+            DBG_PRINTF_TRACE("SE ALCANZO EL MAXIMOOOO**********************");
           }
-        } else {
-          led_driver_brightness = std::max(min_led_driver_brightness, led_driver_brightness - 0.01002f);
-          underglow_brightness = std::max(min_underglow_brightness, underglow_brightness - 0.00505f);
+          LEDManagement::set_ledDriver_brightness(led_driver_brightness);
+          LEDManagement::set_underglow_brightness(underglow_brightness);
+          LEDManagement::set_updated(true);
 
-          if (led_driver_brightness <= min_led_driver_brightness) {
-            reached_bl_brightness = true;
-          }
-          if (underglow_brightness <= min_underglow_brightness) {
-            reached_ug_brightness = true;
-          }
-          if (reached_ug_brightness && reached_bl_brightness) {
-            base_settings.delay_ms = 0;
-            reached_ug_brightness = reached_bl_brightness = false;
-            LEDManagement::onDismount(LEDManagement::LedBrightnessControlEffect::FADE_EFFECT);
-          }
+        } else {
+            DBG_PRINTF_TRACE("led_driver_brightness %f : min_led_driver_brightness %f",led_driver_brightness,min_led_driver_brightness);
+            if (led_driver_brightness <= min_led_driver_brightness) {
+              DBG_PRINTF_TRACE("Condicion 1 cumplida");
+              reached_bl_brightness = true;
+            }
+            if (underglow_brightness <= min_underglow_brightness) {
+              DBG_PRINTF_TRACE("Condicion 2 cumplida");
+              reached_ug_brightness = true;
+            }
+            if (reached_ug_brightness && reached_bl_brightness) {
+              base_settings.delay_ms = 0;
+              reached_ug_brightness = reached_bl_brightness = false;
+              LEDManagement::onDismount(LEDManagement::LedBrightnessControlEffect::FADE_EFFECT);
+            }
+            if (!(reached_ug_brightness && reached_bl_brightness)){
+              led_driver_brightness = std::max(min_led_driver_brightness, led_driver_brightness - 0.01002f);
+              underglow_brightness = std::max(min_underglow_brightness, underglow_brightness - 0.00505f);
+              DBG_PRINTF_TRACE("MAx reached, led_driver_brightness %f",led_driver_brightness);
+              DBG_PRINTF_TRACE("MAx reached, underglow_brightness %f",underglow_brightness);
+            }
+            LEDManagement::set_ledDriver_brightness(led_driver_brightness);
+            LEDManagement::set_underglow_brightness(underglow_brightness);
+            LEDManagement::set_updated(true);
         }
       } else if (layer == 0) {
+        DBG_PRINTF_TRACE("LAYER == 0**************************");
+        flag = true;
         max_reached = false;
-        led_driver_brightness = min_led_driver_brightness;
-        underglow_brightness = min_underglow_brightness;
         reached_ug_brightness = reached_bl_brightness = false;
-
-        // Allow battery management to control the battery if it's low.
-        LEDManagement::onDismount(LEDManagement::LedBrightnessControlEffect::FADE_EFFECT);
         base_settings.delay_ms = 0;
+        LEDManagement::onDismount(LEDManagement::LedBrightnessControlEffect::FADE_EFFECT);
       }
-      LEDManagement::set_ledDriver_brightness(led_driver_brightness);
-      LEDManagement::set_underglow_brightness(underglow_brightness);
     } else {
       base_settings.delay_ms = 0;
     }
-    LEDManagement::set_updated(true);
   }
 
 #endif
