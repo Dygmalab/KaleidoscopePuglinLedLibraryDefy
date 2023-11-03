@@ -163,15 +163,6 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
 
     LEDManagement::set_led_at(breathe, channel_id + 1);
   }
-  RGBW ledToggle(RGBW ledColor) {
-      static bool ledStatus = false;
-      RGBW color            = ledOff;
-      if (ledStatus) {
-        color = ledColor;
-      }
-      ledStatus = !ledStatus;
-      return color;
-  }
 #endif
   uint8_t paired_channels_;
   uint8_t connected_channel_id_;
