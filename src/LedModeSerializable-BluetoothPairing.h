@@ -45,11 +45,6 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
 
 #ifdef KEYSCANNER
   void update() override {
-    constexpr float top_brightness_level = 0.7f;
-    constexpr float top_ug_brightness_level = 0.29f;
-    BatteryManagement::brightnessHandler(false);
-    LEDManagement::set_ledDriver_brightness(top_brightness_level);
-    LEDManagement::set_underglow_brightness(top_ug_brightness_level);
     for (int i = 4; i >= 0; i--) { //Iterate through each bit
       bool bit = ( paired_channels_>> i) & 1; // Read the bit at position i using shift and AND
 
@@ -62,6 +57,7 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
       }
     }
     if(gpio_get(25)){ //Right side
+      LEDManagement::set_led_at(yellow, 6);
       for (int i = 5; i >= 1 ; --i) {
 
         LEDManagement::set_led_at(key_color[6-i], i);
@@ -81,7 +77,7 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
       }
     } else { //Left side
       for (uint8_t i = 1; i < 6 ; ++i) {
-
+        LEDManagement::set_led_at(yellow, 0);
         LEDManagement::set_led_at(key_color[i], i);
         if (is_paired[i] == 1){
           LEDManagement::set_led_at(red, i+7);
@@ -167,15 +163,6 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
 
     LEDManagement::set_led_at(breathe, channel_id + 1);
   }
-  RGBW ledToggle(RGBW ledColor) {
-      static bool ledStatus = false;
-      RGBW color            = ledOff;
-      if (ledStatus) {
-        color = ledColor;
-      }
-      ledStatus = !ledStatus;
-      return color;
-  }
 #endif
   uint8_t paired_channels_;
   uint8_t connected_channel_id_;
@@ -189,6 +176,7 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
   static constexpr RGBW green  = {0, 255, 0, 0};
   static constexpr RGBW blue  = {0, 0, 255, 0};
   static constexpr RGBW red    = {255, 0, 0, 0};
+  static constexpr RGBW yellow    = {150, 150, 0, 0};
   static constexpr RGBW ledOff = {0, 0, 0, 0};
   enum Channels : uint8_t {
     NOT_CONNECTED = 5,

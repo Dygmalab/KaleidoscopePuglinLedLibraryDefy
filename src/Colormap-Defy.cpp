@@ -21,6 +21,7 @@
 #include <Kaleidoscope-FocusSerial.h>
 #include "kaleidoscope/layers.h"
 #include "LED-Palette-Theme-Defy.h"
+#include "nrf_log.h"
 
 namespace kaleidoscope {
 namespace plugin {
@@ -149,13 +150,6 @@ EventHandlerResult ColormapEffectDefy::onSetup() {
   Communications.callbacks.bind(CONNECTED, ([this](Packet packet) {
                                   updateUnderGlowCommunications(packet);
                                 }));
-  Communications.callbacks.bind(CONNECTED, ([](const Packet &) {
-                                  if (!::LEDControl.isEnabled()) {
-                                    Communications_protocol::Packet p{};
-                                    p.header.command = Communications_protocol::SLEEP;
-                                    Communications.sendPacket(p);
-                                  }
-                                }));
   return EventHandlerResult::OK;
 }
 
@@ -235,22 +229,22 @@ void ColormapEffectDefy::updateUnderGlowCommunications(Packet &packet) {
   }
 }
 
-void ColormapEffectDefy::updateBrigthness(bool updateWiredBrightness, bool setMaxBrightness) {
-
+void ColormapEffectDefy::updateBrigthness(LedBrightnessControlEffect led_effect_id, bool take_brightness_handler, bool updateWiredBrightness) {
   Packet packet;
   packet.header.command = BRIGHTNESS;
-  packet.header.size    = 2;
+  packet.header.size    = 4;
 
   auto &ledDriver = Runtime.device().ledDriver();
 
   if (updateWiredBrightness) {
-    packet.data[0] = setMaxBrightness ? 200 : ledDriver.getBrightness();
+    packet.data[0] = ledDriver.getBrightness();
     packet.data[1] = ledDriver.getBrightnessUG();
   } else {
-    packet.data[0] = setMaxBrightness ? 200 : ledDriver.getBrightnessWireless();
+    packet.data[0] = ledDriver.getBrightnessWireless();
     packet.data[1] = ledDriver.getBrightnessUGWireless();
   }
-
+  packet.data[2] = static_cast<uint8_t>(led_effect_id); //LED effect ID.
+  packet.data[3] = take_brightness_handler; // Tell KS that we want to take (or left) brightness control.
   packet.header.device = UNKNOWN;
   Communications.sendPacket(packet);
 }
