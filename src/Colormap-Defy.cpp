@@ -21,7 +21,6 @@
 #include <Kaleidoscope-FocusSerial.h>
 #include "kaleidoscope/layers.h"
 #include "LED-Palette-Theme-Defy.h"
-#include "nrf_log.h"
 
 namespace kaleidoscope {
 namespace plugin {
