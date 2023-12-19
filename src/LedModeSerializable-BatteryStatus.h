@@ -31,7 +31,7 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
 #ifdef KEYSCANNER
 
   void update() override {
-    const uint8_t batteryLevel = BatteryManagement::getBatteryLevel();
+    const uint8_t batteryLevel = BatteryManagement::getBatteryPercentage();
     const BatteryManagement::BatteryStatus batteryStatus = BatteryManagement::getBatteryStatus();
 
     uint16_t current_time = (uint16_t)to_ms_since_boot(get_absolute_time());
