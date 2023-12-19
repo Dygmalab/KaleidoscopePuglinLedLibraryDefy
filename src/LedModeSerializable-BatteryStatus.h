@@ -82,7 +82,7 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
       }
       break;
     case BatteryManagement::FAULT:
-    case BatteryManagement::ERROR:
+    case BatteryManagement::UNKNOWN:
       break;
     }
   }
