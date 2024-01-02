@@ -116,7 +116,7 @@ class LedModeSerializable_Stalker : public LedModeSerializable {
 
   void update() override {
     uint8_t data[KeyScanner::ROWS]{};
-    KeyScanner.readMatrix(data);
+    KeyScanner.get_key_matrix(data);
     for (int i = 0; i < KeyScanner::ROWS; ++i) {
       uint8_t rows = data[i];
       for (int j = 0; j < KeyScanner::COLS; ++j) {
