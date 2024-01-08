@@ -630,7 +630,7 @@ const uint8_t defaultcolormap::colormaps[4][kaleidoscope_internal::device.led_co
    GREEN
   }
 };
-
+//alsdkfajñ
 void DefaultColormap::setup() {
   install();
 }
