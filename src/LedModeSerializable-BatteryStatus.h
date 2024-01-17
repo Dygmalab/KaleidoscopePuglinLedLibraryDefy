@@ -31,11 +31,15 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
 #ifdef KEYSCANNER
 
   void update() override {
-    const uint8_t batteryLevel = BatteryManagement::getBatteryLevel();
+    const uint8_t batteryLevel = BatteryManagement::getBatteryPercentage();
     const BatteryManagement::BatteryStatus batteryStatus = BatteryManagement::getBatteryStatus();
 
-    uint16_t current_time = (uint16_t)to_ms_since_boot(get_absolute_time());
-    static uint16_t last_execution_time = 0;
+    /* NOTE: The time handling this way will make trouble when the uint32 overflows (approx. 49 days without restart)
+     *       The base the timing on the 64-bit absolute time instead. We should, however, do it correctly by creating
+     *       Time module and start using it for all timing processes throughout the project. */
+
+    uint32_t current_time = (uint32_t)to_ms_since_boot(get_absolute_time());
+    static uint32_t last_execution_time = 0;
 
     switch (batteryStatus) {
     case BatteryManagement::CHARGING_DONE:
@@ -82,7 +86,7 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
       }
       break;
     case BatteryManagement::FAULT:
-    case BatteryManagement::ERROR:
+    case BatteryManagement::UNKNOWN:
       break;
     }
   }
