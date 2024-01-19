@@ -1,5 +1,5 @@
 #pragma once
-
+// Juan
 #include "LedModeSerializable.h"
 #include "cstdio"
 
@@ -112,20 +112,20 @@ class LedModeSerializable_Stalker : public LedModeSerializable {
     return color;
   }
 
-  inline static std::array<std::array<uint8_t, KeyScanner::COLS>, KeyScanner::ROWS> map{};
+  inline static std::array<std::array<uint8_t, Pins::COLS>, Pins::ROWS> map{};
 
   void update() override {
-    uint8_t data[KeyScanner::ROWS]{};
+    uint8_t data[Pins::ROWS]{};
     KeyScanner.readMatrix(data);
-    for (int i = 0; i < KeyScanner::ROWS; ++i) {
+    for (int i = 0; i < Pins::ROWS; ++i) {
       uint8_t rows = data[i];
-      for (int j = 0; j < KeyScanner::COLS; ++j) {
+      for (int j = 0; j < Pins::COLS; ++j) {
         if (rows >> j & 1 )
           map[i][j] = 0xFF;
 
         uint8_t &step = map[i][j];
         if (!step) continue;
-        uint8_t pos = i * (KeyScanner::ROWS + 2) + j;
+        uint8_t pos = i * (Pins::ROWS + 2) + j;
         if (pos > 26) {
           pos--;
         }

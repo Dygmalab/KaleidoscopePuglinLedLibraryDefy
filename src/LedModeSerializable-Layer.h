@@ -50,8 +50,10 @@ class LedModeSerializable_Layer : public LedModeSerializable {
     }
 
     for (uint8_t i = 0; i < NUMBER_OF_LEDS; i++) {
+
       RGBW &color = LEDManagement::palette[actualLayer.leds[i]];
-      LEDManagement::set_led_at(color, i);
+      RGBW white = {0,0,0,255};
+      LEDManagement::set_led_at(white, i);
     }
 
     if (fade_is_on ){
