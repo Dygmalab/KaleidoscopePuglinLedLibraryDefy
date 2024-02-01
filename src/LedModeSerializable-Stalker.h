@@ -125,10 +125,17 @@ class LedModeSerializable_Stalker : public LedModeSerializable {
 
         uint8_t &step = map[i][j];
         if (!step) continue;
+
+
+        #ifdef RAISE2
+          uint8_t pos = i * Pins::COLS + j;
+        #else
         uint8_t pos = i * (Pins::ROWS + 2) + j;
         if (pos > 26) {
           pos--;
         }
+        #endif
+
         if (step) {
           RGBW color = compute_function_(step);
           LEDManagement::set_led_at(color, pos);
