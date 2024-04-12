@@ -1,3 +1,27 @@
+/* LedModeSerializable_BatteryStatus - LED Battery effect that is then serialized to the keyscanner when executed.
+ * Copyright (C) 2023, 2024  DygmaLabs, S. L.
+ *
+ * The MIT License (MIT)
+ * Copyright © 2024 <copyright holders>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the “Software”), to deal in the
+ * Software without restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+ * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 #pragma once
 
 #include "LedModeSerializable.h"
@@ -19,7 +43,7 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
   }
 
   uint8_t deSerialize(const uint8_t *input) override {
-    uint8_t index = LedModeSerializable::deSerialize(input);
+    uint8_t index          = LedModeSerializable::deSerialize(input);
     base_settings.delay_ms = 10;
     return ++index;
   }
@@ -31,14 +55,14 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
 #ifdef KEYSCANNER
 
   void update() override {
-    const uint8_t batteryLevel = BatteryManagement::getBatteryPercentage();
+    const uint8_t batteryLevel                           = BatteryManagement::getBatteryPercentage();
     const BatteryManagement::BatteryStatus batteryStatus = BatteryManagement::getBatteryStatus();
 
     /* NOTE: The time handling this way will make trouble when the uint32 overflows (approx. 49 days without restart)
      *       The base the timing on the 64-bit absolute time instead. We should, however, do it correctly by creating
      *       Time module and start using it for all timing processes throughout the project. */
 
-    uint32_t current_time = (uint32_t)to_ms_since_boot(get_absolute_time());
+    uint32_t current_time               = (uint32_t)to_ms_since_boot(get_absolute_time());
     static uint32_t last_execution_time = 0;
 
     switch (batteryStatus) {
@@ -52,26 +76,26 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
         THIRD_CELL,
         NO_CELL,
       } currentCell = NO_CELL;
-      if (current_time - last_execution_time > charging_time_led_effect){
+      if (current_time - last_execution_time > charging_time_led_effect) {
         last_execution_time = current_time;
         switch (currentCell) {
-          case NO_CELL:
-            setLedState(ledOff, ledOff, ledOff);
-            currentCell = THIRD_CELL;
-            break;
-          case THIRD_CELL:
-            setLedState(ledOff, ledOff, green);
-            currentCell = SECOND_CELL;
-            break;
-          case SECOND_CELL:
-            setLedState(ledOff, green, green);
-            currentCell = FIRST_CELL;
-            break;
-          case FIRST_CELL:
-            setLedState(green, green, green);
-            currentCell = NO_CELL;
-            break;
-          }
+        case NO_CELL:
+          setLedState(ledOff, ledOff, ledOff);
+          currentCell = THIRD_CELL;
+          break;
+        case THIRD_CELL:
+          setLedState(ledOff, ledOff, green);
+          currentCell = SECOND_CELL;
+          break;
+        case SECOND_CELL:
+          setLedState(ledOff, green, green);
+          currentCell = FIRST_CELL;
+          break;
+        case FIRST_CELL:
+          setLedState(green, green, green);
+          currentCell = NO_CELL;
+          break;
+        }
       }
       break;
     case BatteryManagement::NOT_CHARGHING:
@@ -92,20 +116,20 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
   }
 
  private:
-  static inline RGBW firstCell = { 0, 0, 0, 0 };
-  static inline RGBW secondCell = { 0, 0, 0, 0 };
-  static inline RGBW thirdCell = { 0, 0, 0, 0 };
+  static inline RGBW firstCell  = {0, 0, 0, 0};
+  static inline RGBW secondCell = {0, 0, 0, 0};
+  static inline RGBW thirdCell  = {0, 0, 0, 0};
 
-  static constexpr RGBW green = { 0, 255, 0, 0 };
-  static constexpr RGBW red = { 255, 0, 0, 0 };
-  static constexpr RGBW ledOff = { 0, 0, 0, 0 };
+  static constexpr RGBW green  = {0, 255, 0, 0};
+  static constexpr RGBW red    = {255, 0, 0, 0};
+  static constexpr RGBW ledOff = {0, 0, 0, 0};
 
-  static constexpr uint8_t thirdCellPosition = 20;
+  static constexpr uint8_t thirdCellPosition        = 20;
   static constexpr uint8_t charging_time_led_effect = 160;
-  static void setLedState(const RGBW& first, const RGBW& second, const RGBW& third) {
-    firstCell = first;
+  static void setLedState(const RGBW &first, const RGBW &second, const RGBW &third) {
+    firstCell  = first;
     secondCell = second;
-    thirdCell = third;
+    thirdCell  = third;
     updateLedEffect();
   }
 
@@ -117,23 +141,23 @@ class LedModeSerializable_BatteryStatus : public LedModeSerializable {
   }
 
   static void breathe(uint8_t cellPosition) {
-      uint8_t i = ((uint16_t)to_ms_since_boot(get_absolute_time())) >> 3;
+    uint8_t i = ((uint16_t)to_ms_since_boot(get_absolute_time())) >> 3;
 
-      if (i & 0x80) {
-        i = 255 - i;
-      }
-
-      i           = i << 1;
-      uint8_t ii  = (i * i) >> 8;
-      uint8_t iii = (ii * i) >> 8;
-
-      i = (((3 * (uint16_t)(ii)) - (2 * (uint16_t)(iii))) / 2) + 80;
-
-      RGBW breathe = LEDManagement::HSVtoRGB(0, 255, i);
-      breathe.w    = 0;
-
-      LEDManagement::set_led_at(breathe, cellPosition);
+    if (i & 0x80) {
+      i = 255 - i;
     }
+
+    i           = i << 1;
+    uint8_t ii  = (i * i) >> 8;
+    uint8_t iii = (ii * i) >> 8;
+
+    i = (((3 * (uint16_t)(ii)) - (2 * (uint16_t)(iii))) / 2) + 80;
+
+    RGBW breathe = LEDManagement::HSVtoRGB(0, 255, i);
+    breathe.w    = 0;
+
+    LEDManagement::set_led_at(breathe, cellPosition);
+  }
 #endif
 };
 

@@ -1,3 +1,27 @@
+/* LedModeSerializable_Breathe - LED Breathe effect that is then serialized to the keyscanner when executed.
+ * Copyright (C) 2023, 2024  DygmaLabs, S. L.
+ *
+ * The MIT License (MIT)
+ * Copyright © 2024 <copyright holders>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the “Software”), to deal in the
+ * Software without restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+ * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 #pragma once
 
 #include "LedModeSerializable.h"
@@ -21,7 +45,7 @@ class LedModeSerializable_Breathe : public LedModeSerializable {
   }
 
 #ifdef KEYSCANNER
-  
+
   uint8_t deSerialize(const uint8_t *input) override {
     uint8_t index     = LedModeSerializable::deSerialize(input);
     breatheSaturation = input[index];
@@ -30,6 +54,7 @@ class LedModeSerializable_Breathe : public LedModeSerializable {
   }
 
   void update() override {
+    // This code is adapted from FastLED lib8tion.h as of dd5d96c6b289cb6b4b891748a4aeef3ddceaf0e6
     uint8_t i = ((uint16_t)to_ms_since_boot(get_absolute_time())) >> 4;
 
     if (i & 0x80) {

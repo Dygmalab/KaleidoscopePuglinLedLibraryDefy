@@ -1,6 +1,7 @@
 /* -*- mode: c++ -*-
 * Kaleidoscope-Colormap -- Per-layer colormap effect
 * Copyright (C) 2016, 2017, 2018  Keyboard.io, Inc
+* Copyright (C) 2023, 2024  DygmaLabs, S. L.
 *
 * This program is free software: you can redistribute it and/or modify it under it under
 * the terms of the GNU General Public License as published by the Free Software
@@ -78,12 +79,12 @@ class ColormapEffectDefy : public Plugin,
  public:
   static uint8_t getMaxLayers();
   static void setSideStatus(Communications_protocol::Devices side);
+
  private:
   static uint8_t max_layers_;
   static uint16_t map_base_;
   void updateKeyMapCommunications(Packet &packet);
   void updateUnderGlowCommunications(Packet &packet);
-
 };
 }  // namespace plugin
 }  // namespace kaleidoscope

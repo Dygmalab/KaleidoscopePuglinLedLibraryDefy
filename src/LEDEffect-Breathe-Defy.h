@@ -1,5 +1,6 @@
 /* Kaleidoscope-LEDEffect-SolidColor - Solid color LED effects for Kaleidoscope.
  * Copyright (C) 2017  Keyboard.io, Inc.
+ * Copyright (C) 2023, 2024  DygmaLabs, S. L.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
@@ -23,8 +24,8 @@
 namespace kaleidoscope {
 namespace plugin {
 class LEDBreatheDefy : public Plugin,
-                          public LEDModeInterface,
-                          public LedModeCommunication {
+                       public LEDModeInterface,
+                       public LedModeCommunication {
  public:
   LEDBreatheDefy(uint8_t hue, uint8_t saturation)
     : hue_(hue), saturation_(saturation) {

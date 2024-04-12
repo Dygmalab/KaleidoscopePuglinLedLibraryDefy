@@ -1,6 +1,7 @@
 /* -*- mode: c++ -*-
 * Kaleidoscope-Colormap -- Per-layer colormap effect
 * Copyright (C) 2016, 2017, 2018  Keyboard.io, Inc
+* Copyright (C) 2023, 2024  DygmaLabs, S. L.
 *
 * This program is free software: you can redistribute it and/or modify it under it under
 * the terms of the GNU General Public License as published by the Free Software
@@ -116,8 +117,8 @@ EventHandlerResult ColormapEffectDefy::onFocusEvent(const char *command) {
 
   Runtime.storage().commit();
   auto const &keyScanner = Runtime.device().keyScanner();
-  auto deviceLeft = keyScanner.leftHandDevice();
-  auto devicesRight = keyScanner.rightHandDevice();
+  auto deviceLeft        = keyScanner.leftHandDevice();
+  auto devicesRight      = keyScanner.rightHandDevice();
   Packet packet{};
   packet.header.device = deviceLeft;
   updateKeyMapCommunications(packet);
@@ -242,8 +243,8 @@ void ColormapEffectDefy::updateBrigthness(LedBrightnessControlEffect led_effect_
     packet.data[0] = ledDriver.getBrightnessWireless();
     packet.data[1] = ledDriver.getBrightnessUGWireless();
   }
-  packet.data[2] = static_cast<uint8_t>(led_effect_id); //LED effect ID.
-  packet.data[3] = take_brightness_handler; // Tell KS that we want to take (or left) brightness control.
+  packet.data[2]       = static_cast<uint8_t>(led_effect_id);  //LED effect ID.
+  packet.data[3]       = take_brightness_handler;              // Tell KS that we want to take (or left) brightness control.
   packet.header.device = UNKNOWN;
   Communications.sendPacket(packet);
 }

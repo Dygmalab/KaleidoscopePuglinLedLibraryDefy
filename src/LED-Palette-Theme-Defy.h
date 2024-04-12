@@ -1,6 +1,7 @@
 /* -*- mode: c++ -*-
  * Kaleidoscope-LED-Palette-Theme -- Palette-based LED theme foundation
  * Copyright (C) 2017, 2018  Keyboard.io, Inc
+ * Copyright (C) 2023, 2024  DygmaLabs, S. L.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
