@@ -23,7 +23,6 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
     output[++index] = advertising_id;
     output[++index] = defy_id_side;
     output[++index] = erease_done;
-
     return ++index;
   }
 
@@ -126,8 +125,25 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
       counter++;
     }
   }
-
+#ifdef RAISE2
     void setUnderglowLEDS(){
+      if(underglow_led_id > NUMBER_OF_LEDS){
+        underglow_led_id = Pins::BL_LEDS_RIGHT;
+      }
+      LEDManagement::set_led_at(blue, underglow_led_id);
+
+      if(underglow_led_id - 1 != Pins::BL_LEDS_RIGHT - 1){
+        LEDManagement::set_led_at(ledOff, underglow_led_id - 1);
+      }
+      if (underglow_led_id + 1 > NUMBER_OF_LEDS){
+        LEDManagement::set_led_at(blue, Pins::BL_LEDS_RIGHT);
+      } else {
+        LEDManagement::set_led_at(blue, underglow_led_id + 1);
+      }
+      underglow_led_id++;
+    }
+#else
+  void setUnderglowLEDS(){
     if(underglow_led_id > 88){
       underglow_led_id = 35;
     }
@@ -142,6 +158,8 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
     }
     underglow_led_id++;
   }
+#endif
+
 
   void breathe(uint8_t channel_id){
     static bool led_on = true;
@@ -184,7 +202,7 @@ class LedModeSerializable_BluetoothPairing : public LedModeSerializable {
   };
   std::vector<RGBW> key_color{5};
   std::vector<uint8_t> is_paired{5};
-  uint8_t underglow_led_id = 35;
+  uint8_t underglow_led_id = 36;
 #endif
 };
 
