@@ -77,7 +77,8 @@ namespace plugin {
 namespace defaultcolormap {
 extern bool palette_defined;
 extern const cRGB palette[];
-extern const uint8_t colormaps[][kaleidoscope_internal::device.led_count];
+extern const uint8_t colormaps_iso[][kaleidoscope_internal::device.led_count];
+extern const uint8_t colormaps_ansi[][kaleidoscope_internal::device.led_count];
 extern const uint8_t colormap_layers;
 }  // namespace defaultcolormap
 
