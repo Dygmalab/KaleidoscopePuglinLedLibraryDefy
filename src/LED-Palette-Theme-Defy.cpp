@@ -27,10 +27,16 @@ uint16_t LEDPaletteThemeDefy::palette_base_;
 uint16_t LEDPaletteThemeDefy::leds_per_layer_in_memory_;
 
 uint16_t LEDPaletteThemeDefy::reserveThemes(uint8_t max_themes) {
+  uint16_t led_count = Runtime.device().led_count;
   if (!palette_base_)
     palette_base_ = ::EEPROMSettings.requestSlice(16 * sizeof(cRGB));
-  //plus 2 so that we can have the neuron in a full position
-  leds_per_layer_in_memory_ = (Runtime.device().led_count) / 2;
+  //If led_count is odd we need to add one to make it even
+  if ( led_count % 2 )
+  {
+    led_count += 1; 
+  }
+  leds_per_layer_in_memory_ = (led_count) / 2;
+  //If leds_per_layer_in_memory_ is odd we need to add one to make it even
   return ::EEPROMSettings.requestSlice(max_themes * leds_per_layer_in_memory_);
 }
 

@@ -91,7 +91,7 @@ EventHandlerResult ColormapEffectDefy::onFocusEvent(const char *command) {
   if (strcmp(command, expected_command) != 0)
     return EventHandlerResult::OK;
 
-  uint16_t max_index = (max_layers_ * (Runtime.device().led_count / 2));
+  uint16_t max_index = (max_layers_ * (Runtime.device().led_count )) / 2;
 
   if (::Focus.isEOL()) {
     for (uint16_t pos = 0; pos < max_index; pos++) {
@@ -104,7 +104,8 @@ EventHandlerResult ColormapEffectDefy::onFocusEvent(const char *command) {
 
   uint16_t pos = 0;
 
-  while (!::Focus.isEOL() && (pos < max_index)) {
+  while (!::Focus.isEOL() && (pos < max_index))
+  {
     uint8_t idx1, idx2;
     ::Focus.read(idx1);
     ::Focus.read(idx2);
@@ -134,11 +135,8 @@ EventHandlerResult ColormapEffectDefy::onFocusEvent(const char *command) {
 
 void ColormapEffectDefy::getLayer(uint8_t layer, uint8_t output_buf[Runtime.device().led_count]) {
   static bool shift = true;
-  for (uint16_t i = 0; i < Runtime.device().led_count; ++i) {
-/*    if (layer > 0 && shift){
-      i = 2;
-      shift = false;
-    }*/
+  for (uint16_t i = 0; i < Runtime.device().led_count; ++i)
+  {
     output_buf[i] = getColorIndexAtPosition(layer, i);
   }
 
@@ -241,15 +239,17 @@ void ColormapEffectDefy::updateUnderGlowCommunications(Packet &packet) {
   uint8_t baseUnderGlowIndex;
   if (packet.header.device == KEYSCANNER_DEFY_RIGHT || packet.header.device == Communications_protocol::RF_DEFY_RIGHT || packet.header.device == Communications_protocol::BLE_DEFY_RIGHT) {
     baseUnderGlowIndex = Runtime.device().ledDriver().key_matrix_left + Runtime.device().ledDriver().key_matrix_right +
-                         Runtime.device().ledDriver().underglow_leds - 2;
+                         Runtime.device().ledDriver().underglow_leds;
     right_side = true;
   } else {
-    baseUnderGlowIndex = Runtime.device().ledDriver().key_matrix_left + Runtime.device().ledDriver().key_matrix_right  - 2;
+    baseUnderGlowIndex = Runtime.device().ledDriver().key_matrix_left + Runtime.device().ledDriver().key_matrix_right;
     right_side = false;
   }
-  if (right_side){
+  if (right_side)
+  {
     uint8_t layerColors[Runtime.device().led_count];
-    for (uint8_t layer = 0; layer < max_layers_; ++layer) {
+    for (uint8_t layer = 0; layer < max_layers_; ++layer)
+    {
       getLayer(layer, layerColors);
       packet.header.command       = Communications_protocol::LAYER_UNDERGLOW_COLORS;
       const uint8_t sizeofMessage = Runtime.device().ledDriver().underglow_leds_right / 2.0 + 0.5;
@@ -258,7 +258,8 @@ void ColormapEffectDefy::updateUnderGlowCommunications(Packet &packet) {
       packet.data[0]     = layer;
       bool swap          = true;
       uint8_t k{};
-      for (int j = 0; j < Runtime.device().ledDriver().underglow_leds_right; ++j) {
+      for (int j = 0; j < Runtime.device().ledDriver().underglow_leds_right; ++j)
+      {
         if (swap) {
           message[k].firstColor = layerColors[baseUnderGlowIndex + j];
         } else {
@@ -269,7 +270,9 @@ void ColormapEffectDefy::updateUnderGlowCommunications(Packet &packet) {
       memcpy(&packet.data[1], message, packet.header.size - 1);
       Communications.sendPacket(packet);
     }
-  } else {
+  }
+  else
+  {
     uint8_t layerColors[Runtime.device().led_count];
     for (uint8_t layer = 0; layer < max_layers_; ++layer) {
       getLayer(layer, layerColors);
